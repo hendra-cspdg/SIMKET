@@ -61,6 +61,11 @@ table.small-font{
 }
 
 
+td.bpsnetral
+{
+  background-color: #3C8DBC;
+}
+
 td.bpsbad
 {
   background-color: #FF3835;
@@ -117,4 +122,16 @@ td.bpsgood
 
 #loading, #jadwal-success, #jadwal-error, .table-hidden{
   display: none;
+}]
+
+td.uline {
+  text-decoration: underline;
+}
+
+td.w50 {
+  width: 50%;
+}
+
+.scrollme {
+  overflow-y: auto;
 }

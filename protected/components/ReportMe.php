@@ -35,7 +35,10 @@ class ReportMe
                 ORDER BY point DESC, jumlah_target DESC, jumlah_kegiatan DESC 
                 LIMIT 1";
 
-        return Yii::app()->db->createCommand($sql)->queryRow();
+        $data = Yii::app()->db->createCommand($sql)->queryRow();
+        $data['url'] = Yii::app()->createUrl('site/peringkat');
+
+        return $data;
     }
 
     public static function Peringkat1Bulanan($year,$month)
@@ -47,8 +50,11 @@ class ReportMe
                 GROUP BY unitkerja
                 ORDER BY point DESC, jumlah_target DESC, jumlah_kegiatan DESC 
                 LIMIT 1";
+                
+        $data = Yii::app()->db->createCommand($sql)->queryRow();
+        $data['url'] = Yii::app()->createUrl('site/peringkat_month');
 
-        return Yii::app()->db->createCommand($sql)->queryRow();
+        return $data;
     }
 
     public static function ValuePerKabBidang($bidang,$kab,$tahun)
@@ -66,7 +72,7 @@ class ReportMe
         $data=0;
         $result=Yii::app()->db->createCommand($sql)->queryAll();
         if(count($result)>0)
-            $data=$result[0]['point'];
+            $data=number_format($result[0]['point'],2);
         return $data;
     }
 

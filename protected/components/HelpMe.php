@@ -50,18 +50,18 @@ class HelpMe
     public static function getMonthList_singleNumber()
     {
         $arr=array();
-        $arr[]=array('id'=>1,'label'=>'Januari');
-        $arr[]=array('id'=>2,'label'=>'Februari');
-        $arr[]=array('id'=>3,'label'=>'Maret');
-        $arr[]=array('id'=>4,'label'=>'April');
-        $arr[]=array('id'=>5,'label'=>'Mei');
-        $arr[]=array('id'=>6,'label'=>'Juni');
-        $arr[]=array('id'=>7,'label'=>'Juli');
-        $arr[]=array('id'=>8,'label'=>'Agustus');
-        $arr[]=array('id'=>9,'label'=>'September');
-        $arr[]=array('id'=>10,'label'=>'Oktober');
-        $arr[]=array('id'=>11,'label'=>'November');
-        $arr[]=array('id'=>12,'label'=>'Desember');
+        $arr[]=array('id'=>1,'label'=>'Januari', 'short_lbl'=>'Jan');
+        $arr[]=array('id'=>2,'label'=>'Februari', 'short_lbl'=>'Feb');
+        $arr[]=array('id'=>3,'label'=>'Maret', 'short_lbl'=>'Mar');
+        $arr[]=array('id'=>4,'label'=>'April', 'short_lbl'=>'Apr');
+        $arr[]=array('id'=>5,'label'=>'Mei', 'short_lbl'=>'Mei');
+        $arr[]=array('id'=>6,'label'=>'Juni', 'short_lbl'=>'Jun');
+        $arr[]=array('id'=>7,'label'=>'Juli', 'short_lbl'=>'Jul');
+        $arr[]=array('id'=>8,'label'=>'Agustus', 'short_lbl'=>'Ags');
+        $arr[]=array('id'=>9,'label'=>'September', 'short_lbl'=>'Sep');
+        $arr[]=array('id'=>10,'label'=>'Oktober', 'short_lbl'=>'Okt');
+        $arr[]=array('id'=>11,'label'=>'November', 'short_lbl'=>'Nov');
+        $arr[]=array('id'=>12,'label'=>'Desember', 'short_lbl'=>'Des');
 
         return CHtml::listData($arr,'id','label');
     }
@@ -80,22 +80,22 @@ class HelpMe
     public static function getMonthListArr()
     {
         $arr=array();
-        $arr[]=array('id'=>'01','label'=>'Januari');
-        $arr[]=array('id'=>'02','label'=>'Februari');
-        $arr[]=array('id'=>'03','label'=>'Maret');
-        $arr[]=array('id'=>'04','label'=>'April');
-        $arr[]=array('id'=>'05','label'=>'Mei');
-        $arr[]=array('id'=>'06','label'=>'Juni');
-        $arr[]=array('id'=>'07','label'=>'Juli');
-        $arr[]=array('id'=>'08','label'=>'Agustus');
-        $arr[]=array('id'=>'09','label'=>'September');
-        $arr[]=array('id'=>10,'label'=>'Oktober');
-        $arr[]=array('id'=>11,'label'=>'November');
-        $arr[]=array('id'=>12,'label'=>'Desember');
+        
+        $arr[]=array('id'=>'01','label'=>'Januari', 'short_lbl'=>'Jan');
+        $arr[]=array('id'=>'02','label'=>'Februari', 'short_lbl'=>'Feb');
+        $arr[]=array('id'=>'03','label'=>'Maret', 'short_lbl'=>'Mar');
+        $arr[]=array('id'=>'04','label'=>'April', 'short_lbl'=>'Apr');
+        $arr[]=array('id'=>'05','label'=>'Mei', 'short_lbl'=>'Mei');
+        $arr[]=array('id'=>'06','label'=>'Juni', 'short_lbl'=>'Jun');
+        $arr[]=array('id'=>'07','label'=>'Juli', 'short_lbl'=>'Jul');
+        $arr[]=array('id'=>'08','label'=>'Agustus', 'short_lbl'=>'Ags');
+        $arr[]=array('id'=>'09','label'=>'September', 'short_lbl'=>'Sep');
+        $arr[]=array('id'=>10,'label'=>'Oktober', 'short_lbl'=>'Okt');
+        $arr[]=array('id'=>11,'label'=>'November', 'short_lbl'=>'Nov');
+        $arr[]=array('id'=>12,'label'=>'Desember', 'short_lbl'=>'Des');
 
         return $arr;
     }
-
 
     public static function getBidangBosList()
     {
@@ -123,12 +123,15 @@ class HelpMe
         return CHtml::listData($arr,'id','label');
     }
 
-    public static function getKabKotaList()
+    public static function getKabKotaList($with_prov=false)
     {
-        $sql="SELECT * FROM unit_kerja WHERE parent=1 AND jenis=2";
+        $sql="SELECT * FROM unit_kerja WHERE parent=1 AND jenis=2 ORDER BY code";
         $data=Yii::app()->db->createCommand($sql)->queryAll();
 
         $arr=array();
+
+        if($with_prov)
+            $arr[]=array('id'=>0, 'label'=>'Semua Kab/Kota');
         foreach ($data as $key => $value) {
             $arr[]=array('id'=>$value['id'],'label'=>$value['name']);
         }
@@ -187,8 +190,23 @@ class HelpMe
         return $result;
     }
 
-    public static function getJenisData()
+    public static function getListEselon3($with_prov=false)
     {
+        $sql="SELECT * FROM unit_kerja WHERE jenis=2 OR (jenis=1 AND parent=1) ORDER BY code";
+        $data=Yii::app()->db->createCommand($sql)->queryAll();
+
+        $arr=array();
+
+        if($with_prov)
+            $arr[]=array('id'=>0, 'label'=>'Semua Kab/Kota');
+        foreach ($data as $key => $value) {
+            $arr[]=array('id'=>$value['id'],'label'=>$value['name']);
+        }
+
+        return CHtml::listData($arr,'id','label');
+    }
+
+    public static function getRawJenisData(){
         $result=array();
         $result[]=array('id'=>1,'label'=>'Bulanan');
         $result[]=array('id'=>2,'label'=>'Triwulanan');
@@ -196,7 +214,43 @@ class HelpMe
         $result[]=array('id'=>4,'label'=>'Tahunan');
         $result[]=array('id'=>5,'label'=>'Subround');
 
-        return CHtml::listData($result,'id','label');   
+        return $result;
+    }
+
+    public static function showJenisData($value){
+        foreach(self::getRawJenisData() as $curr) {
+            if($curr['id'] == $value) {
+                return $curr['label'];
+            }
+        }
+    }
+
+    public static function getJenisData()
+    {
+        return CHtml::listData(self::getRawJenisData(),'id','label');   
+    }
+
+
+    public static function getRawAnggaran(){
+        $result=array();
+        $result[]=array('id'=>1,'label'=>'Persiapan');
+        $result[]=array('id'=>2,'label'=>'Pelatihan');
+        $result[]=array('id'=>3,'label'=>'Lapangan');
+        $result[]=array('id'=>4,'label'=>'Pengolahan');
+
+        return $result;
+    }
+
+    public static function showAnggaran($value){
+        foreach(self::getRawAnggaran() as $curr) {
+            if($curr['id'] == $value) {
+                return $curr['label'];
+            }
+        }
+    }
+    
+    public static function getDropDownAnggaran(){
+        return CHtml::listData(self::getRawAnggaran(),'id','label');   
     }
 
     //check if current user authorize for unit kerja

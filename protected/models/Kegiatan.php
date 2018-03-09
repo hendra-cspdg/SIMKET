@@ -182,6 +182,35 @@ class Kegiatan extends HelpAr
 		return parent::model($className);
 	}
 
+	public function CalendarClassByDate($id)
+	{
+		$data = $this->findByPk($id);
+		$kelas="1";
+		$now = time(); // or your date as well
+     	$data_date = strtotime($data['end_date']);
+     	$datediff = $data_date-$now;
+     	$total_day=floor($datediff/(60*60*24));
+     	//1 hijau, 2 kuning, 3 merah
+
+     	if($total_day>7)
+     	{
+     		$kelas=0;
+     	}
+     	else if($total_day<=7 && $total_day>=1)
+     	{
+     		$kelas=2;
+     	}
+     	else
+     	{
+     		if($data->getProgressValue()==100)
+     			$kelas=1;
+     		else
+     			$kelas=3;
+     	}
+
+		return $kelas;
+	}
+
 	public function CalendarClass()
 	{
 		$kelas="1";
@@ -212,7 +241,7 @@ class Kegiatan extends HelpAr
 
 	public function TabelClass()
 	{
-		$kelas="bpsgood";
+		$kelas="bpsnetral";
 		$now = time(); // or your date as well
      	$data_date = strtotime($this->end_date);
      	$datediff = $data_date-$now;
@@ -221,7 +250,7 @@ class Kegiatan extends HelpAr
 
      	if($total_day>7)
      	{
-     		$kelas="bpsgood";
+     		$kelas="bpsnetral";
      	}
      	else if($total_day<=7 && $total_day>=1)
      	{
@@ -254,9 +283,14 @@ class Kegiatan extends HelpAr
 		));
 	}
 
-	public function getKegiatan2017Plus()
+	public function getKegiatan2017Plus($id)
 	{
-		$sql="SELECT * FROM kegiatan WHERE YEAR(start_date)>=2018 OR YEAR(end_date)>=2018";
+		if($id!=1){
+            $listbidang=HelpMe::ListBidangCode($id);
+			$label_where=" AND unit_kerja IN({$listbidang})";
+		}
+
+		$sql="SELECT * FROM kegiatan WHERE (YEAR(start_date)>=2018 OR YEAR(end_date)>=2018) $label_where";
 		$return_value=Yii::app()->db->createCommand($sql)->queryAll();
 
 		return $return_value;

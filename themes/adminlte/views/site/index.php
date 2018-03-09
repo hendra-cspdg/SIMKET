@@ -1,3 +1,7 @@
+<?php $baseUrl = Yii::app()->theme->baseUrl; ?>
+<style>
+    @import url('<?php echo $baseUrl.'/dist/css/jadwal.css';?>');
+</style>
 <div id="dashboard_tag">
       <!-- Main row -->
       <div class="row">
@@ -76,7 +80,8 @@
               'color'       =>  'aqua',
               'kegiatan'    =>  $peringkat1tahun['jumlah_kegiatan'],
               'target'      =>  $peringkat1tahun['jumlah_target'],
-              'point'       =>  $peringkat1tahun['point']
+              'point'       =>  $peringkat1tahun['point'],
+              'url'         =>  $peringkat1tahun['url'],
             ));
 
 
@@ -86,7 +91,8 @@
               'color'       =>  'green',
               'kegiatan'    =>  $peringkat1bulan['jumlah_kegiatan'],
               'target'      =>  $peringkat1bulan['jumlah_target'],
-              'point'       =>  $peringkat1bulan['point']
+              'point'       =>  $peringkat1bulan['point'],
+              'url'         =>  $peringkat1bulan['url'],
             ));
           ?>
 
@@ -119,10 +125,8 @@
 </div>
 
       
-<?php $baseUrl = Yii::app()->theme->baseUrl; ?>
 <script src="<?php echo $baseUrl;?>/plugins/knob/jquery.knob.js"></script>
 <script src="<?php echo $baseUrl;?>/plugins/chartjs/Chart.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.2/moment.min.js"></script>
 <script src="<?php echo $baseUrl;?>/plugins/fullcalendar/fullcalendar.min.js"></script>
 <script src="<?php echo $baseUrl;?>/dist/js/vue_page/site/dashboard.js"></script>
-

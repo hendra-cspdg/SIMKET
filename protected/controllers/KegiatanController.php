@@ -56,17 +56,17 @@ class KegiatanController extends Controller
 		);
 	}
 
-	public function actionListkegiatan(){
-		$model=Kegiatan::model()->getKegiatan2017Plus();
+	public function actionListkegiatan($id){
+		$model=Kegiatan::model()->getKegiatan2017Plus($id);
 
 		$data = array();
 		foreach($model as $value){
 			$data[] = array(
+				'url'=> "index.php?r=kegiatan/progress&id=".$value['id'],
 				'title'=> $value['kegiatan'],
 				'start'=> $value['start_date'],
 				'end'=> $value['end_date'],
-				'backgroundColor'=> "#f56954",
-				'borderColor' => "#f56954"
+				'className'=>"eventColor".Kegiatan::model()->CalendarClassByDate($value['id'])
 			);
 		}
 
@@ -356,8 +356,8 @@ class KegiatanController extends Controller
 			$tahun=$_POST['tahun'];
 
 		$model->filter_tahun = $tahun;
-		if(isset($_GET['Kegiatan']))
-			$model->attributes=$_GET['Kegiatan'];
+		if(isset($_POST['Kegiatan']))
+			$model->attributes=$_POST['Kegiatan'];
 
 		$this->render('admin',array(
 			'model'=>$model,

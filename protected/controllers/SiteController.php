@@ -24,7 +24,11 @@ class SiteController extends Controller
 
 	public function actionCalendar()
 	{
-		$this->render('calendar');
+		$bidang=1;
+
+		$this->render('calendar',array(
+			'bidang'=>$bidang
+		));
 	}
 
 	public function actionPeringkat()
@@ -87,8 +91,8 @@ class SiteController extends Controller
 	 */
 	public function actionIndex()
 	{
-		$peringkat1tahun=ReportMe::Peringkat1Tahunan(2016);
-		$peringkat1bulan=ReportMe::Peringkat1Bulanan(2016,3);
+		$peringkat1tahun=ReportMe::Peringkat1Tahunan(date('Y'));
+		$peringkat1bulan=ReportMe::Peringkat1Bulanan(date('Y'),date('n'));
 
 		$this->render('index',array(
 			'peringkat1tahun'	=>$peringkat1tahun,

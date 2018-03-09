@@ -31,7 +31,7 @@
             ?>
             
             <?php 
-              $list_provinsi=HelpMe::getListProvinsi();
+              $list_provinsi = HelpMe::getListProvinsi();
 
               foreach($list_provinsi as $row){
                 echo '<li><a href="'.Yii::app()->createUrl('site/bidang',array('id'=> $row['id'])).'"><i class="fa fa fa-circle-o"></i> '.$row['label'].'</a></li>';
@@ -53,10 +53,17 @@
               echo '<li><a href="'.Yii::app()->createUrl('site/peringkat').'"><i class="fa fa fa-circle-o"></i> Peringkat Tahunan</a></li>';
               echo '<li><a href="'.Yii::app()->createUrl('site/peringkat_month').'"><i class="fa fa fa-circle-o"></i> Peringkat Bulanan</a></li>';
 
+              echo '<li class="treeview"><a href="#"><i class="fa fa-circle-o"></i> Nilai Kabupaten/Kota
+                <span class="pull-right-container">
+                  <i class="fa fa-angle-left pull-right"></i>
+                </span>
+              </a>';
+              echo '<ul class="treeview-menu">';
               $list_kabupaten=HelpMe::getListKabupaten();              
               foreach($list_kabupaten as $row){
                 echo '<li><a href="'.Yii::app()->createUrl('report/kabupaten',array('id'=> $row['id'])).'"><i class="fa fa fa-circle-o"></i> '.$row['label'].'</a></li>';
               }
+              echo '</ul></li>';
             ?>
           </ul>
         </li>
@@ -96,6 +103,24 @@
           </ul>
         </li>
 
+        <li class="treeview">
+          <a href="#">
+            <i class="fa fa-money"></i>
+            <span>Anggaran</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+          <ul class="treeview-menu">
+            <?php
+              echo '<li><a href="'.Yii::app()->createUrl('indukkegiatan/dashboard').'"><i class="fa fa-circle-o"></i> <span>Progress</span></a></li>';
+              echo '<li><a href="'.Yii::app()->createUrl('indukkegiatan/grafik').'"><i class="fa fa-circle-o"></i> <span>Grafik</span></a></li>';
+              // echo '<li><a href="'.Yii::app()->createUrl('report/index').'"><i class="fa fa fa-circle-o"></i> Per Kegiatan</a></li>';
+              // echo '<li><a href="'.Yii::app()->createUrl('report/rekap').'"><i class="fa fa fa-circle-o"></i> Bulanan</a></li>';
+            ?>
+          </ul>
+        </li>
+
         
         <li class="header">TUGAS DAN DINAS LUAR</li>
 
@@ -125,7 +150,22 @@
                 echo '<li><a href="'.Yii::app()->createUrl('user/index').'"><i class="fa fa-user"></i> User</a></li>';
                 echo '<li><a href="'.Yii::app()->createUrl('pegawai/index').'"><i class="fa fa-user-plus"></i> Pegawai</a></li>';
                 echo '<li><a href="'.Yii::app()->createUrl('unitdaerah/index').'"><i class="fa  fa-bookmark-o"></i> Unit Kerja Kab/Kota</a></li>';
+                
                 echo '<li><a href="'.Yii::app()->createUrl('kegiatan/index').'"><i class="fa fa-cube"></i> Kegiatan</a></li>';
+                
+                echo '<li class="treeview"><a href="#"><i class="fa fa-money"></i> Anggaran
+                  <span class="pull-right-container">
+                    <i class="fa fa-angle-left pull-right"></i>
+                  </span>
+                </a>';
+                echo '<ul class="treeview-menu">';
+                if(Yii::app()->user->getLevel()==1){
+                  echo '<li><a href="'.Yii::app()->createUrl('output/index').'"><i class="fa fa-circle-o"></i> Output</a></li>';
+                  echo '<li><a href="'.Yii::app()->createUrl('indukkegiatan/index').'"><i class="fa fa-circle-o"></i> Komponen</a></li>';
+                }
+                // echo '<li><a href="'.Yii::app()->createUrl('k_anggaran/index').'"><i class="fa fa fa-circle-o"></i> Kegiatan</a></li>';
+                echo '</ul></li>';
+
                 echo '<li><a href="'.Yii::app()->createUrl('unitkerja/index').'"><i class="fa fa-building-o"></i> Unit Kerja</a></li>';
               ?>
             </ul>
