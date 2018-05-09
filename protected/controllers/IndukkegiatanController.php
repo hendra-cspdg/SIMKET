@@ -29,7 +29,7 @@ class IndukkegiatanController extends Controller
 		return array(
 			array('allow',
 				'actions'=>array('index','view', 'create','update','delete',
-					'progress'),
+					'progress', 'progress_j'),
 				'expression'=> function($user){
 					return $user->getLevel()==1;
 				},
@@ -37,15 +37,19 @@ class IndukkegiatanController extends Controller
 			array('allow',
 				'actions'=>array('progress', 'detail_kab_kota',
 					'detail_kegiatan',
-					'insert_anggaran', 'insert_rpd'),
+					'insert_anggaran', 'insert_rpd',
+					'detail_kab_kota_j','uk3'),
 				'expression'=> function($user){
 					return $user->getLevel()<=2;
 				},
 			),
 			array('allow',
-				'actions'=>array('dashboard', 'grafik',
-					'detail_unit'),
+				'actions'=>array('dashboard', 'grafik','detail_unit_kegiatan'),
 				'users'=>array('@'),
+			),
+			array('allow',
+				'actions'=>array('detail_unit'),
+				'users'=>array('*'),
 			),
 			array('deny',  // deny all users
 				'users'=>array('*'),
@@ -53,8 +57,39 @@ class IndukkegiatanController extends Controller
 		);
 	}
 
+
+	public function actionDetail_kab_kota_j($id, $kab_id)
+	{
+		$model = IndukKegiatan::model()->findByPk($id);
+		$data = $model->getByKabKota_j($kab_id);
+		
+		echo CJSON::encode(array
+     	(
+        	 'satu' => $data
+        ));
+        Yii::app()->end();
+	}
+
+	public function actionProgress_j($id){
+		$this->render('progress_j',array(
+			'model'=>$this->loadModel($id),
+		));
+	}
+
 	public function actionGrafik(){
-		$this->render('grafik');
+		$data = IndukKegiatan::getByUnitKerjaAndKegiatan(0);
+		$this->render('grafik',array(
+			'data'	=>$data
+		));
+	}
+
+	public function actionUk3($id){
+		$data = IndukKegiatan::getAllAnggaranPerUnitKerja($id);
+		$model = $this->loadModelUk($id);
+		$this->render('uk3',array(
+			'data'	=>$data,
+			'model'	=>$model
+		));
 	}
 
 	public function actionInsert_anggaran($id)
@@ -231,7 +266,6 @@ class IndukkegiatanController extends Controller
         Yii::app()->end();
 	}
 
-
 	public function actionDetail_unit($id)
 	{
 		$data = IndukKegiatan::getByUnitKerja($id);
@@ -396,7 +430,15 @@ class IndukkegiatanController extends Controller
 	 */
 	public function loadModel($id)
 	{
-		$model=IndukKegiatan::model()->findByPk($id);
+		$model = IndukKegiatan::model()->findByPk($id);
+		if($model===null)
+			throw new CHttpException(404,'The requested page does not exist.');
+		return $model;
+	}
+
+	public function loadModelUk($id)
+	{
+		$model = UnitKerja::model()->findByPk($id);
 		if($model===null)
 			throw new CHttpException(404,'The requested page does not exist.');
 		return $model;

@@ -9,8 +9,6 @@
 
         <!-- Left col -->
         <section class="col-lg-7 connectedSortable">
-
-
           <div class="box box-info">
             <div class="box-header with-border">
               <h3 class="box-title">Resume Kegiatan <?php echo date('Y'); ?></h3>
@@ -56,13 +54,21 @@
             <!-- /.footer -->
           </div>
 
-          <div class="box box-info">
+          <div class="box box-solid bg-teal-gradient">
             <div class="box-header with-border">
-              <h3 class="box-title">% Realisasi Bulanan <?php echo date('Y') ?></h3>
+              <i class="fa fa-th"></i>
+              <h3 class="box-title">Grafik RPD & Realisasi Anggaran</h3>
+              <div class="pull-right box-tools">
+                <a type="button" href="<?php echo Yii::app()->createUrl('indukkegiatan/grafik'); ?>" class="btn btn-default btn-sm" style="color:#fff"><u><b>Selengkapnya >></b></u></a>
+              </div>
             </div>
             <div class="box-body">
+              &nbsp&nbsp<i>Ket: 
+                  &nbsp&nbsp<i class="fa fa fa-circle text-primary"></i> Rencana Penarikan Dana
+                  &nbsp&nbsp<i class="fa fa fa-circle text-green"></i> Realisasi Anggaran
+              </i>
               <div class="chart">
-                <canvas id="barChart" style="height:230px"></canvas>
+                <div class="chart" id="anggaran-chart" style="height: 300px;"></div>
               </div>
             </div>
             <!-- /.box-body -->
@@ -84,16 +90,17 @@
               'url'         =>  $peringkat1tahun['url'],
             ));
 
-
-            $this->widget('WJuara', array(
-              'kab_name'    =>  $peringkat1bulan['name'],
-              'title_name'  =>  'Peringkat 1 Bulan '.date('F').' Tahun '.date('Y'),
-              'color'       =>  'green',
-              'kegiatan'    =>  $peringkat1bulan['jumlah_kegiatan'],
-              'target'      =>  $peringkat1bulan['jumlah_target'],
-              'point'       =>  $peringkat1bulan['point'],
-              'url'         =>  $peringkat1bulan['url'],
-            ));
+            if(array_key_exists("name",$peringkat1bulan)){
+              $this->widget('WJuara', array(
+                'kab_name'    =>  $peringkat1bulan['name'],
+                'title_name'  =>  'Peringkat 1 Bulan '.date('F').' Tahun '.date('Y'),
+                'color'       =>  'green',
+                'kegiatan'    =>  $peringkat1bulan['jumlah_kegiatan'],
+                'target'      =>  $peringkat1bulan['jumlah_target'],
+                'point'       =>  $peringkat1bulan['point'],
+                'url'         =>  $peringkat1bulan['url'],
+              ));
+            }
           ?>
 
           <!-- Calendar -->
@@ -129,4 +136,6 @@
 <script src="<?php echo $baseUrl;?>/plugins/chartjs/Chart.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.2/moment.min.js"></script>
 <script src="<?php echo $baseUrl;?>/plugins/fullcalendar/fullcalendar.min.js"></script>
+<script src="<?php echo $baseUrl;?>//plugins/raphael/raphael.js"></script>
+<script src="<?php echo $baseUrl;?>//plugins/morris/morris.min.js"></script>
 <script src="<?php echo $baseUrl;?>/dist/js/vue_page/site/dashboard.js"></script>

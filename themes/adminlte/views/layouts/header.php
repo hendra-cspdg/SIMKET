@@ -2,8 +2,10 @@
 
     <!-- Logo -->
     <a href="<?php echo Yii::app()->createUrl('site/index') ?>" class="logo">
-      <span class="logo-mini"><b>S</b>KT</span>
-      <span class="logo-lg"><b>SIMKET</b></span>
+      <!-- <span class="logo-mini"><b>S</b>KT</span>
+      <span class="logo-lg"><b>SIMKET</b></span> -->
+      <span class="logo-mini"><b><?php echo GLabel::$short_title1; ?></b><?php echo GLabel::$short_title2; ?></span>
+      <span class="logo-lg"><b><?php echo GLabel::$long_title; ?></b></span>
     </a>
 
     <!-- Header Navbar: style can be found in header.less -->
@@ -16,13 +18,49 @@
       <div class="navbar-custom-menu">
         <ul class="nav navbar-nav">
           
-          <li class="dropdown messages-menu">
+          <!-- <li class="dropdown messages-menu">
             <a href="https://laci.bps.go.id/s/rJvvgHkm2KPvl8s">
               <i class="fa fa-file-pdf-o"></i>
               Panduan Penggunaan
               <span class="label label-success">&#8730;</span>
             </a>
+          </li> -->
+
+
+          <li class="dropdown notifications-menu">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+              <i class="fa fa-file-pdf-o"></i>
+              Panduan Penggunaan
+              <span class="label label-success">3</span>
+            </a>
+            <ul class="dropdown-menu">
+              <li class="header">Panduan SIM RAPOR</li>
+              <li>
+                <!-- inner menu: contains the actual data -->
+                <ul class="menu">
+                  <li>
+                    <a href="https://laci.bps.go.id/s/rJvvgHkm2KPvl8s">
+                      <i class="fa fa-users text-aqua"></i> Panduan Awal
+                    </a>
+                  </li>
+                  <!-- <li>
+                    <a href="https://laci.bps.go.id/s/R8Dmm3bIrK1jItI">
+                      <i class="fa fa-shopping-cart text-green"></i> MODUL Anggaran
+                    </a>
+                  </li>
+
+                  <li>
+                    <a href="https://laci.bps.go.id/s/1xRoh37hx6kP3zY">
+                      <i class="fa fa-sticky-note text-yellow"></i> Slide SIMKET pada BIMTEK TU
+                    </a>
+                  </li> -->
+                </ul>
+              </li>
+            </ul>
           </li>
+
+
+
 
 
           <li class="dropdown user user-menu">

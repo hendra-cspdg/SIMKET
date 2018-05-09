@@ -34,7 +34,8 @@ class MitrabpsController extends Controller
 				},
 			),
 			array('allow', // allow authenticated user to perform 'create' and 'update' actions
-				'actions'=>array('create','update', 'delete'),
+				'actions'=>array('create','update', 'delete',
+					'rapor', 'detail'),
 				'expression'=> function($user){
 					return $user->getLevel()<=2;
 				},
@@ -56,6 +57,13 @@ class MitrabpsController extends Controller
 		));
 	}
 
+	public function actionDetail($id)
+	{
+		$this->render('detail',array(
+			'model'=>$this->loadModel($id),
+		));
+	}
+
 	/**
 	 * Creates a new model.
 	 * If creation is successful, the browser will be redirected to the 'view' page.
@@ -71,6 +79,7 @@ class MitrabpsController extends Controller
 		{
 			$model->attributes=$_POST['MitraBps'];
 			$model->kab_id=$_POST['MitraBps']['kab_id'];
+			$model->riwayat=$_POST['MitraBps']['riwayat'];
 			if($model->save())
 				$this->redirect(array('view','id'=>$model->id));
 		}
@@ -96,6 +105,7 @@ class MitrabpsController extends Controller
 		{
 			$model->attributes=$_POST['MitraBps'];
 			$model->kab_id=$_POST['MitraBps']['kab_id'];
+			$model->riwayat=$_POST['MitraBps']['riwayat'];
 			if($model->save())
 				$this->redirect(array('view','id'=>$model->id));
 		}
@@ -126,10 +136,23 @@ class MitrabpsController extends Controller
 	{
 		$model=new MitraBps('search');
 		$model->unsetAttributes();  // clear any default values
-		if(isset($_GET['MitraBps']))
-			$model->attributes=$_GET['MitraBps'];
+		if(isset($_POST['MitraBps']))
+			$model->attributes=$_POST['MitraBps'];
 
 		$this->render('admin',array(
+			'model'=>$model,
+		));
+	}
+
+
+	public function actionRapor()
+	{
+		$model=new MitraBps('search');
+		$model->unsetAttributes();  // clear any default values
+		if(isset($_POST['MitraBps']))
+			$model->attributes=$_POST['MitraBps'];
+
+		$this->render('rapor',array(
 			'model'=>$model,
 		));
 	}

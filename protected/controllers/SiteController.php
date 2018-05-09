@@ -85,16 +85,12 @@ class SiteController extends Controller
 		));	
 	}	
 
-	/**
-	 * This is the default 'index' action that is invoked
-	 * when an action is not explicitly requested by users.
-	 */
 	public function actionIndex()
 	{
 		$peringkat1tahun=ReportMe::Peringkat1Tahunan(date('Y'));
 		$peringkat1bulan=ReportMe::Peringkat1Bulanan(date('Y'),date('n'));
 
-		$this->render('index',array(
+		$this->render('index_1604',array(
 			'peringkat1tahun'	=>$peringkat1tahun,
 			'peringkat1bulan'	=>$peringkat1bulan,
 		));

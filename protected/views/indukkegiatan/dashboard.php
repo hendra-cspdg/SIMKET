@@ -1,16 +1,24 @@
 <div class="box box-info">
 	<div class="mailbox-controls">
-		<b>Kelola Induk Kegiatan</b>
-		<div class="pull-right">
-			<?php echo CHtml::link("<i class='fa fa-plus'></i> Tambah Induk Kegiatan", array('create'), array('class'=>'btn btn-default btn-sm toggle-event')) ?>
-		</div>
+		<b>Komponen Anggaran</b>
 	</div>
 
 	<div class="box-body">
-		<?php $this->renderPartial('_search',array(
-			'model'=>$model,
-		)); ?>
 
+		<div class="box box-solid bg-blue">
+			<div class="box-header">
+              <i class="fa fa-th"></i>
+
+              <h3 class="box-title">Filter Data</h3>
+            </div>
+
+            <div class="box-footer text-black no-border">
+				<?php $this->renderPartial('_search',array(
+					'model'=>$model,
+				)); ?>
+			</div>
+		</div>
+		
 		<?php $this->widget('zii.widgets.grid.CGridView', array(
 			'id'=>'induk-kegiatan-grid',
 			'dataProvider'=>$model->search(),
@@ -58,8 +66,14 @@
                     'header'	=>'',
                     'type'		=>'raw',
                     'cssClassExpression' => '"center uline"',
-                    'value'		=> function($data){ return CHtml::link("Progress",array("indukkegiatan/progress","id"=>$data->id),array('class'=>'btn btn-sm btn-flat btn-default')); },
-                ),
+                    'value'		=> function($data){ return CHtml::link("Input Progress",array("indukkegiatan/progress","id"=>$data->id),array('class'=>'btn btn-sm btn-flat btn-default')); },
+				),
+				// array(
+                //     'header'	=>'',
+                //     'type'		=>'raw',
+                //     'cssClassExpression' => '"center uline"',
+                //     'value'		=> function($data){ return CHtml::link("Progress Per Jenis",array("indukkegiatan/progress_j","id"=>$data->id),array('class'=>'btn btn-sm btn-flat btn-default')); },
+                // ),
 			),
 		)); ?>
 	</div>

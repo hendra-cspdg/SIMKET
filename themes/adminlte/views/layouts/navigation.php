@@ -1,17 +1,7 @@
   <aside class="main-sidebar">
     <section class="sidebar">
-      <!-- <form action="#" method="get" class="sidebar-form">
-        <div class="input-group">
-          <input type="text" name="q" class="form-control" placeholder="Search...">
-              <span class="input-group-btn">
-                <button type="submit" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
-                </button>
-              </span>
-        </div>
-      </form> -->
-
       <ul class="sidebar-menu">         
-        <li class="header">MONITORING</li>
+      <li class="header">MONITORING</li>
         <?php 
           echo '<li><a href="'.Yii::app()->createUrl('site/index').'"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a></li>';
         ?>
@@ -115,13 +105,29 @@
             <?php
               echo '<li><a href="'.Yii::app()->createUrl('indukkegiatan/dashboard').'"><i class="fa fa-circle-o"></i> <span>Progress</span></a></li>';
               echo '<li><a href="'.Yii::app()->createUrl('indukkegiatan/grafik').'"><i class="fa fa-circle-o"></i> <span>Grafik</span></a></li>';
+
+              echo '<li class="treeview"><a href="#"><i class="fa fa-circle-o"></i> Anggaran Unit Kerja
+                <span class="pull-right-container">
+                  <i class="fa fa-angle-left pull-right"></i>
+                </span>
+              </a>';
+              echo '<ul class="treeview-menu">';
+              $list_prov=HelpMe::getListProvinsi();          
+              foreach($list_prov as $row){
+                echo '<li><a href="'.Yii::app()->createUrl('indukkegiatan/uk3',array('id'=> $row['id'])).'"><i class="fa fa fa-circle-o"></i> '.$row['label'].'</a></li>';
+              }
+              $list_kabupaten=HelpMe::getListKabupaten();              
+              foreach($list_kabupaten as $row){
+                echo '<li><a href="'.Yii::app()->createUrl('indukkegiatan/uk3',array('id'=> $row['id'])).'"><i class="fa fa fa-circle-o"></i> '.$row['label'].'</a></li>';
+              }
+              echo '</ul></li>';
               // echo '<li><a href="'.Yii::app()->createUrl('report/index').'"><i class="fa fa fa-circle-o"></i> Per Kegiatan</a></li>';
               // echo '<li><a href="'.Yii::app()->createUrl('report/rekap').'"><i class="fa fa fa-circle-o"></i> Bulanan</a></li>';
             ?>
           </ul>
         </li>
 
-        
+<!--         
         <li class="header">TUGAS DAN DINAS LUAR</li>
 
         <?php if(!Yii::app()->user->isGuest){ ?>
@@ -130,7 +136,7 @@
         <?php } ?>
         <li><a href="<?php echo Yii::app()->createUrl('jadwalTugas/calendar'); ?>"><i class="fa fa-calendar"></i><span> Kalender Tugas dan DL</span></a></li>
         <li><a href="<?php echo Yii::app()->createUrl('jadwalTugas/single_calendar'); ?>"><i class="fa fa-calendar-plus-o"></i><span> Kalender Pegawai</span></a></li>
-        
+         -->
         <li class="header">WILAYAH</li>
         <?php 
           echo '<li><a href="'.Yii::app()->createUrl('mfd/index').'"><i class="fa fa-map-o"></i> Wilayah Sumatera Selatan</a></li>';
@@ -167,10 +173,12 @@
                 echo '</ul></li>';
 
                 echo '<li><a href="'.Yii::app()->createUrl('unitkerja/index').'"><i class="fa fa-building-o"></i> Unit Kerja</a></li>';
+                echo '<li><a href="'.Yii::app()->createUrl('mitrabps/index').'"><i class="fa fa-circle-o"></i> Mitra BPS</a></li>';
               ?>
             </ul>
           </li>
         <?php } ?>
+
 
       </ul>
     </section>

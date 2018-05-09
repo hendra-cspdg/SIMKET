@@ -112,4 +112,64 @@ class Pegawai extends HelpAr
 	{
 		return parent::model($className);
 	}
+
+	public function getNilaiAndJumlah(){
+		$idnya = $this->nip;
+		$sql = "SELECT IFNULL(AVG(nilai),0) as rata, COUNT(id) as jumlah 
+					FROM `kegiatan_mitra_petugas` 
+					WHERE id_mitra='$idnya'";
+
+		
+		$sql_result = Yii::app()->db->createCommand($sql)->queryRow();	
+
+		$result = array();
+		$result['rata'] = $sql_result['rata'];
+		$result['jumlah'] = $sql_result['jumlah'];
+
+		$label = "";
+
+		// print_r($result['jumlah']);die();
+		
+		if($result['rata'] <= 1.65){ $label = "Buruk"; }
+		else if($result['rata'] > 1.66 && $result['rata']<= 2.65){  $label = "Cukup"; }
+		else if($result['rata'] > 2.66 && $result['rata']<= 3.65){  $label = "Baik"; }
+		else if($result['rata'] > 3.65){  $label = "Amat Baik"; }
+
+		$result['labelRata'] = $label;
+
+		return $result;
+	}
+
+	public function getListKegiatan(){
+		$idnya = $this->nip;
+		$sql = "SELECT kmp.id, km.nama, kmp.status, kmp.nilai 
+					FROM kegiatan_mitra_petugas kmp,
+					kegiatan_mitra km
+					WHERE km.id = kmp.id_kegiatan AND id_mitra = '$idnya'";
+
+		return Yii::app()->db->createCommand($sql)->queryAll();
+	}
+
+	public function getResumePertanyaan(){
+		$idnya = $this->nip;
+
+		$sql = "SELECT AVG(nilai) as rata,  
+					SUM(if(m.nilai = 1, 1, 0)) AS jumlah1,
+					SUM(if(m.nilai = 2, 1, 0)) AS jumlah2,
+					SUM(if(m.nilai = 3, 1, 0)) AS jumlah3,
+					SUM(if(m.nilai = 4, 1, 0)) AS jumlah4,  
+					pertanyaan_id, p.pertanyaan ,
+					(SELECT o.description FROM mitra_option o WHERE o.id_pertanyaan=pertanyaan_id AND o.skala=1 LIMIT 1) as opt1,
+					(SELECT o.description FROM mitra_option o WHERE o.id_pertanyaan=pertanyaan_id AND o.skala=2 LIMIT 1) as opt2,
+					(SELECT o.description FROM mitra_option o WHERE o.id_pertanyaan=pertanyaan_id AND o.skala=3 LIMIT 1) as opt3,
+					(SELECT o.description FROM mitra_option o WHERE o.id_pertanyaan=pertanyaan_id AND o.skala=4 LIMIT 1) as opt4
+					
+					FROM `mitra_nilai` m, 
+					mitra_pertanyaan p
+					WHERE 
+						m.pertanyaan_id=p.id  AND mitra_id IN (SELECT id FROM kegiatan_mitra_petugas WHERE id_mitra='$idnya') 
+					GROUP BY pertanyaan_id";
+
+		return Yii::app()->db->createCommand($sql)->queryAll();		
+	}
 }
