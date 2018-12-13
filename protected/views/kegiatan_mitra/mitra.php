@@ -4,9 +4,6 @@
 </style>
 <div id="mitra_tag">
     
-    <?php
-    if(HelpMe::isAuthorizeUnitKerja($model->kab_id)){
-    ?>
         <div class="box box-info">
             <div class="mailbox-controls">
                 <b><?php echo $model->nama; ?></b>
@@ -24,17 +21,21 @@
                             <p>Data Kegiatan</p>
                         </div>
                         <div class="stepwizard-step">
-                            <a href="#step-2" type="button" class="btn btn-primary btn-circle">2</a>
+                            <?php echo CHtml::link("2", array('form', 'id'=>$model->id), array('class'=>'btn btn-default btn-circle')); ?>
+                            <p>Kelola Pertanyaan</p>
+                        </div>
+                        <div class="stepwizard-step">
+                            <a href="#step-3" type="button" class="btn btn-primary btn-circle">3</a>
                             <p>Petugas Lapangan</p>
                         </div>
                         <div class="stepwizard-step">
-                            <a href="#step-3" type="button" class="btn btn-default btn-circle" disabled="disabled">3</a>
+                            <a href="#step-4" type="button" class="btn btn-default btn-circle" disabled="disabled">4</a>
                             <p>Skoring Petugas</p>
                         </div>
 
                         <div class="stepwizard-step">
                             <?php
-                                echo CHtml::link("4", array("resume", 'id'=>$model->id), array('class'=>'btn btn-default btn-circle'));
+                                echo CHtml::link("5", array("resume", 'id'=>$model->id), array('class'=>'btn btn-default btn-circle'));
                             ?>
                             <p>Resume Kegiatan</p>
                         </div>
@@ -45,7 +46,9 @@
 
                 <div class="pull-right">
                     <?php //echo CHtml::link("<i class='fa fa-plus'></i> Tambah Mitra", array('create'), array('class'=>'btn btn-default btn-sm toggle-event')) ?>
+                    <?php if(HelpMe::isAuthorizeUnitKerja($model->kab_id)){ ?>
                     <button type="button" class="btn btn-default btn-sm toggle-event" data-toggle="modal" data-target="#myModal"><i class='fa fa-plus'></i> Tambah Petugas</button>
+                    <?php } ?>
                 </div>
                 <div class="row setup-content" id="step-1">
                     <div class="col-xs-12">
@@ -59,8 +62,10 @@
                                     <th>NIP (Jika organik)</th>
                                     <th class="text-center">Status & wilayah tugas(khusus PCL)</th>
                                     <th class="text-center">Nilai</th>
+                                    <?php if(HelpMe::isAuthorizeUnitKerja($model->kab_id)){ ?>
                                     <th></th>
                                     <th></th>
+                                    <?php } ?>
                                 </tr>
                                 <?php
                                     foreach ($list_mitra as $key => $value)
@@ -70,15 +75,21 @@
                                             echo '<td>'.$value['nama'].'</td>';
                                             echo '<td>'.$value['nip'].'</td>';
                                         
-                                            echo '<td class="text-center">'.$value['status'].'</td>';
-                                            echo '<td class="text-center">'.$value['nilai'].' / 4</td>';
-                                            echo '<td class="text-center">';
-                                                echo CHtml::link("<i class='fa fa-tachometer'></i> Penilaian", array('nilai', 'id'=> $value['id']), array('class'=>'btn btn-default btn-sm'));
+                                            echo '<td class="text-center">'.$value['status'].$value['list_wilayah'];
+                                            if(HelpMe::isAuthorizeUnitKerja($model->kab_id)){ 
+                                                echo $value['btn_wilayah'];
+                                            }
                                             echo '</td>';
-                                            
-                                            echo '<td class="text-center">';
-                                                echo '<a href="#" data-id="'.$value['id'].'"  class="btn btn-default btn-sm delete-petugas"><i class="fa fa-trash"></i> Hapus</a>';
-                                            echo '</td>';
+                                            echo '<td class="text-center">'.round($value['nilai'],2).' / 4</td>';
+                                            if(HelpMe::isAuthorizeUnitKerja($model->kab_id)){ 
+                                                echo '<td class="text-center">';
+                                                    echo CHtml::link("<i class='fa fa-tachometer'></i> Penilaian", array('nilai', 'id'=> $value['id']), array('class'=>'btn btn-default btn-sm'));
+                                                echo '</td>';
+                                                
+                                                echo '<td class="text-center">';
+                                                    echo '<a href="#" data-id="'.$value['id'].'"  class="btn btn-default btn-sm delete-petugas"><i class="fa fa-trash"></i> Hapus</a>';
+                                                echo '</td>';
+                                            }
                                         
 
                                         echo '</tr>';
@@ -91,12 +102,6 @@
 
             </div>
         </div>
-
-    <?php } else { ?>
-        <div class="page-header">
-            <h1>Anda Tidak Memiliki Autorisasi Pada Halaman Ini</h1>
-        </div>
-    <?php } ?>
 
 
 

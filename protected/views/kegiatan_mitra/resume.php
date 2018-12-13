@@ -10,24 +10,24 @@
             <div class="stepwizard">
                 <div class="stepwizard-row setup-panel">
                     <div class="stepwizard-step">
-                        <?php 
-					    	echo CHtml::link("1", array('update', 'id'=>$model->id), array('class'=>'btn btn-default btn-circle'));
-                        ?>
+                        <?php echo CHtml::link("1", array('update', 'id'=>$model->id), array('class'=>'btn btn-default btn-circle')); ?>
                         <p>Data Kegiatan</p>
                     </div>
                     <div class="stepwizard-step">
-                        <?php 
-					    	echo CHtml::link("2", array('mitra', 'id'=>$model->id), array('class'=>'btn btn-default btn-circle'));
-                        ?>
+                        <?php echo CHtml::link("2", array('form', 'id'=>$model->id), array('class'=>'btn btn-default btn-circle'));?>
+                        <p>Kelola Pertanyaan</p>
+                    </div>
+                    <div class="stepwizard-step">
+                        <?php echo CHtml::link("3", array('mitra', 'id'=>$model->id), array('class'=>'btn btn-default btn-circle')); ?>
                         <p>Petugas Lapangan</p>
                     </div>
                     <div class="stepwizard-step">
-                        <a href="#step-3" type="button" class="btn btn-default btn-circle">3</a>
+                        <a href="#step-4" type="button" class="btn btn-default btn-circle">4</a>
                         <p>Skoring Petugas</p>
                     </div>
 
                     <div class="stepwizard-step">
-                        <a href="#step-4" type="button" class="btn btn-primary btn-circle">4</a>
+                        <a href="#step-5" type="button" class="btn btn-primary btn-circle">5</a>
                         <p>Resume Kegiatan</p>
                     </div>
                 </div>
@@ -80,9 +80,9 @@
                 <div class="col-sm-6">
                     <ul class="nav nav-stacked">
                         <!-- <li><a href="#">% Penilaian <span class="pull-right badge bg-blue">31</span></a></li> -->
-                        <li><a href="#">Nilai Rata-rata <span class="pull-right badge bg-blue"><?php echo $model->resume['rata_nilai'].' / 4'; ?></span></a></li>
-                        <li><a href="#">Nilai Paling Tinggi <span class="pull-right badge bg-aqua"><?php echo $model->resume['max_nilai'].' / 4'; ?></span></a></li>
-                        <li><a href="#">Nilai Paling Kecil <span class="pull-right badge bg-red"><?php echo $model->resume['min_nilai'].' / 4'; ?></span></a></li>
+                        <li><a href="#">Nilai Rata-rata <span class="pull-right badge bg-blue"><?php echo round($model->resume['rata_nilai'],2).' / 4'; ?></span></a></li>
+                        <li><a href="#">Nilai Paling Tinggi <span class="pull-right badge bg-aqua"><?php echo round($model->resume['max_nilai'],2).' / 4'; ?></span></a></li>
+                        <li><a href="#">Nilai Paling Kecil <span class="pull-right badge bg-red"><?php echo round($model->resume['min_nilai'],2).' / 4'; ?></span></a></li>
                     </ul>
                 </div>
             </div>
@@ -92,9 +92,6 @@
             
         </div>
     </div>
-
-
-
 
           <!-- Custom Tabs -->
           <div class="nav-tabs-custom">
@@ -106,30 +103,33 @@
             <div class="tab-content">
                 <div class="tab-pane active" id="tab_1">
 
+                    <div class="box-footer box-comments">
+                    <?php
+                        foreach ($list_mitra as $key => $value)
+                        {
+                            echo '<div class="box-comment">
+                                <img class="img-circle img-sm" src="'.$value['foto'].'" />
+                
+                                <div class="comment-text">
+                                    <span class="username"> ['.$value['status'].'] '.$value['nama'].'<span class="text-muted pull-right">Nilai: '.round($value['nilai'],2).' / 4</span></span>
+                                    <span class="username">NIP: '.$value['nip'].'</span>
+                                </div>
+                            </div>
+                            ';
 
-                    <table class="table table-hover table-bordered table-condensed">
-                        <tr>
-                            <th>No. </th>
-                            <th>Nama</th>
-                            <th>NIP (Jika organik)</th>
-                            <th class="text-center">Status</th>
-                            <th class="text-center">Nilai</th>
-                        </tr>
-                        <?php
-                            foreach ($list_mitra as $key => $value)
-                            {
-                                echo '<tr>';
-                                    echo '<td>'.($key+1).'</td>';
-                                    echo '<td>'.$value['nama'].'</td>';
-                                    echo '<td>'.$value['nip'].'</td>';
-                                
-                                    echo '<td class="text-center">'.$value['status'].'</td>';
-                                    echo '<td class="text-center">'.$value['nilai'].' / 4</td>';
-                                echo '</tr>';
-                                
-                            }
-                        ?>
-                    </table>
+                            // echo '<tr>';
+                            //     echo '<td>'.($key+1).'</td>';
+                            //     echo '<td>'.$value['nama'].'</td>';
+                            //     echo '<td>'.$value['nip'].'</td>';
+                            
+                            //     echo '<td class="text-center">'.$value['status'].'</td>';
+                            //     echo '<td class="text-center">'.round($value['nilai'],2).' / 4</td>';
+                            // echo '</tr>';
+                            
+                        }
+                    ?>
+                    </div>
+                    
 
 
 
@@ -148,7 +148,7 @@
                                 echo '<tr>';
                                     echo '<td>'.($key+1).'</td>';
                                     echo '<td>'.$value['pertanyaan'].'</td>';
-                                    echo '<td class="text-center">'.$value['rata'].' / 4</td>';
+                                    echo '<td class="text-center">'.round($value['rata'],2).' / 4</td>';
                                 echo '</tr>';
                                 
                             }
@@ -175,11 +175,18 @@
                                     
                                         <div class="box-body">
                                             <?php
+                                                $total = $value['jumlah1'] + $value['jumlah2'] + $value['jumlah3'] + $value['jumlah4'];
+                                                $perc1 = round($value['jumlah1'] / $total * 100,2);
+                                                $perc2 = round($value['jumlah2'] / $total * 100,2);
+                                                $perc3 = round($value['jumlah3'] / $total * 100,2);
+                                                $perc4 = round($value['jumlah4'] / $total * 100,2);
+
+
                                                 echo '<div id="donut-chart-'.$value['pertanyaan_id'].'" class="donut-chart" style="height:150px;width: 100%"
-                                                    data-one="'.$value['jumlah1'].'" 
-                                                    data-two="'.$value['jumlah2'].'"
-                                                    data-three="'.$value['jumlah3'].'"
-                                                    data-four="'.$value['jumlah4'].'"
+                                                    data-one="'.$perc1.'" 
+                                                    data-two="'.$perc2.'"
+                                                    data-three="'.$perc3.'"
+                                                    data-four="'.$perc4.'"
                                                     data-optone="'.$value['opt1'].'" 
                                                     data-opttwo="'.$value['opt2'].'"
                                                     data-optthree="'.$value['opt3'].'"
@@ -193,7 +200,7 @@
                                             <ul class="nav nav-pills nav-stacked">
                                                 <?php
                                                     for($i=1;$i<=4;++$i){
-                                                        echo '<li><a href="#">'.$value['opt'.$i].'<span class="pull-right text-blue"> '.$value['jumlah'.$i].'</span></a></li>';
+                                                        echo '<li class="li'.$i.'"><a href="#">'.$value['opt'.$i].'<span class="pull-right text-white"> '.($value['jumlah'.$i] / $total * 100).' %</span></a></li>';
                                                     }
                                                 ?>
                                             </ul>

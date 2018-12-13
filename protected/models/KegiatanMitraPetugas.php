@@ -61,6 +61,37 @@ class KegiatanMitraPetugas extends HelpAr
 		}
 
         return parent::beforeDelete();
+	}
+	
+	public function afterSave()
+    {   
+        if($this->nilai!=0)
+        {    
+			$idnya = $this->id_mitra;
+			$sql = "SELECT IFNULL(AVG(nilai),0) as rata, COUNT(id) as jumlah 
+						FROM `kegiatan_mitra_petugas` 
+						WHERE id_mitra='$idnya'";
+
+			// $result = array();
+			// $result['rata'] = $sql_result['rata'];
+			// $result['jumlah'] = $sql_result['jumlah'];
+
+			$sql_result = Yii::app()->db->createCommand($sql)->queryRow();	
+			if($this->flag_mitra==1){
+				$sql_update = "UPDATE pegawai SET total_menjadi_mitra=".$sql_result['jumlah'].", 
+					nilai_menjadi_mitra=".$sql_result['rata']." WHERE nip='".$idnya."'";
+
+				Yii::app()->db->createCommand($sql_update)->execute();
+			}
+			else{
+				$sql_update = "UPDATE mitra_bps SET total_menjadi_mitra=".$sql_result['jumlah'].", 
+				nilai_menjadi_mitra=".$sql_result['rata']." WHERE id='".$idnya."'";
+
+				Yii::app()->db->createCommand($sql_update)->execute();
+			}
+        }
+
+        return parent::afterSave();
     }
 
 	/**
@@ -101,23 +132,36 @@ class KegiatanMitraPetugas extends HelpAr
 
 	public function getTotalNilai(){
 		$idnya = $this->id;
-		$sql = "SELECT SUM(nilai) FROM mitra_nilai WHERE mitra_id=$idnya";
+		//mitra id disini bukan id pegawai/mitra, tetapi id dari kegiatan_mitra_petugas.
+		//karena itulah kita tidak perlu filter lagi by kegiatan.
+		$sql = "SELECT COALESCE(SUM(nilai),0) FROM mitra_nilai WHERE mitra_id=$idnya";
 
 		return Yii::app()->db->createCommand($sql)->queryScalar();
 	}
 
 	public function getTotalPertanyaan(){
-		$statusnya = $this->status;
-		$idnya = $this->id;
-		$sql = "SELECT COUNT(id) FROM mitra_pertanyaan WHERE teruntuk=$statusnya OR teruntuk=3";
+		// $statusnya = $this->status;
+		// $idnya = $this->id;
+		// $sql = "SELECT COUNT(id) FROM mitra_pertanyaan WHERE teruntuk=$statusnya OR teruntuk=3";
 
-		$total_pertanyaan = Yii::app()->db->createCommand($sql)->queryScalar() - 2;
+		// $total = Yii::app()->db->createCommand($sql)->queryScalar();
 
-		$sql_wilayah = "SELECT COUNT(id) FROM kegiatan_mitra_wilayah WHERE kmp_id=$idnya";
-
-		$total_wilayah = Yii::app()->db->createCommand($sql_wilayah)->queryScalar();
-		$total = $total_pertanyaan + (2 * $total_wilayah);
+		// if($statusnya==2){
+		// 	$total_pertanyaan = Yii::app()->db->createCommand($sql)->queryScalar() - 2;
+			
+		// 	$sql_wilayah = "SELECT COUNT(id) FROM kegiatan_mitra_wilayah WHERE kmp_id=$idnya";
+	
+		// 	$total_wilayah = Yii::app()->db->createCommand($sql_wilayah)->queryScalar();
+		// 	$total = $total_pertanyaan + (2 * $total_wilayah);
+		// }
 		// print_r($total_pertanyaan);die();
+
+		$idnya = $this->id;
+		//mitra id disini bukan id pegawai/mitra, tetapi id dari kegiatan_mitra_petugas.
+		//karena itulah kita tidak perlu filter lagi by kegiatan.
+		$sql = "SELECT COALESCE(COUNT(nilai),0) FROM mitra_nilai WHERE mitra_id=$idnya";
+		// print_r($sql);die();
+		$total = Yii::app()->db->createCommand($sql)->queryScalar();
 
 		return $total;
 	}

@@ -35,6 +35,7 @@ class Pegawai extends HelpAr
 			array('unit_kerja', 'numerical', 'integerOnly'=>true),
 			array('nip', 'length', 'max'=>18),
 			array('nama, golongan, jabatan', 'length', 'max'=>255),
+			array('foto', 'file', 'types'=>'jpg, png', 'allowEmpty'=>true, 'maxSize'=>1024*100),
 			// The following rule is used by search().
 			// @todo Please remove those attributes that should not be searched.
 			array('nip, nama, unit_kerja, unit_kerja_kab, golongan, jabatan, created_time, updated_time', 'safe', 'on'=>'search'),
@@ -53,6 +54,13 @@ class Pegawai extends HelpAr
 		);
 	}
 
+	public function getFotoImage(){
+		if($this->foto!==''){
+			return Yii::app()->baseUrl.'/upload/temp/pegawai/' . $this->foto;
+		}
+		return Yii::app()->theme->baseUrl.'/dist/img/avatar.png';
+	}
+
 	/**
 	 * @return array customized attribute labels (name=>label)
 	 */
@@ -67,6 +75,7 @@ class Pegawai extends HelpAr
 			'jabatan' => 'Jabatan',
 			'created_time' => 'Created Time',
 			'updated_time' => 'Updated Time',
+			'foto'	=>'Foto (ukuran maksimal 100kb)',
 		);
 	}
 
@@ -82,7 +91,7 @@ class Pegawai extends HelpAr
 	 * @return CActiveDataProvider the data provider that can return the models
 	 * based on the search/filter conditions.
 	 */
-	public function search()
+	public function search($is_raport=false)
 	{
 		// @todo Please modify the following code to remove attributes that should not be searched.
 
@@ -96,9 +105,37 @@ class Pegawai extends HelpAr
 		$criteria->compare('jabatan',$this->jabatan,true);
 		$criteria->compare('created_time',$this->created_time,true);
 		$criteria->compare('updated_time',$this->updated_time,true);
+		$criteria->compare('is_active',$this->is_active,true);
+
+		if($is_raport){
+			$criteria->order = 'nilai_menjadi_mitra DESC, total_menjadi_mitra DESC';
+		}
 
 		return new CActiveDataProvider($this, array(
 			'criteria'=>$criteria,
+		));
+	}
+
+	public function searchAll($is_raport=false)
+	{
+		// @todo Please modify the following code to remove attributes that should not be searched.
+
+		$criteria=new CDbCriteria;
+
+		$criteria->compare('nama',$this->nama,true);
+		$criteria->compare('unit_kerja',$this->unit_kerja);
+		$criteria->compare('is_active',$this->is_active,true);
+
+		if($is_raport){
+			$criteria->order = 'nilai_menjadi_mitra DESC, total_menjadi_mitra DESC';
+		}
+
+		return new CActiveDataProvider($this, array(
+			'criteria'=>$criteria,
+			'totalItemCount'=>$this->count(),
+			'pagination'=>array(
+				'pageSize'=>$this->count(),
+			 ),
 		));
 	}
 
@@ -111,6 +148,26 @@ class Pegawai extends HelpAr
 	public static function model($className=__CLASS__)
 	{
 		return parent::model($className);
+	}
+
+	public function getPredikatLabel(){
+		if($this->total_menjadi_mitra>0){
+			if($this->nilai_menjadi_mitra <= 1.65){ 
+				return "Buruk";
+			}
+			else if($this->nilai_menjadi_mitra > 1.66 && $this->nilai_menjadi_mitra<= 2.65){  
+				return "Cukup"; 
+			}
+			else if($this->nilai_menjadi_mitra > 2.66 && $this->nilai_menjadi_mitra<= 3.65){  
+				return "Baik";
+			}
+			else if($this->nilai_menjadi_mitra > 3.65){  
+				return "Amat Baik";
+			}
+		}
+		else{
+			return "-";
+		}
 	}
 
 	public function getNilaiAndJumlah(){
@@ -127,15 +184,29 @@ class Pegawai extends HelpAr
 		$result['jumlah'] = $sql_result['jumlah'];
 
 		$label = "";
+		$strata = 1;
 
 		// print_r($result['jumlah']);die();
 		
-		if($result['rata'] <= 1.65){ $label = "Buruk"; }
-		else if($result['rata'] > 1.66 && $result['rata']<= 2.65){  $label = "Cukup"; }
-		else if($result['rata'] > 2.66 && $result['rata']<= 3.65){  $label = "Baik"; }
-		else if($result['rata'] > 3.65){  $label = "Amat Baik"; }
+		if($result['rata'] <= 1.65){ 
+			$label = "Buruk"; 
+			$strata = 1;
+		}
+		else if($result['rata'] > 1.66 && $result['rata']<= 2.65){  
+			$label = "Cukup"; 
+			$strata = 2;
+		}
+		else if($result['rata'] > 2.66 && $result['rata']<= 3.65){  
+			$label = "Baik"; 
+			$strata = 3;
+		}
+		else if($result['rata'] > 3.65){  
+			$label = "Amat Baik"; 
+			$strata = 4;
+		}
 
 		$result['labelRata'] = $label;
+		$result['strata'] = $strata;
 
 		return $result;
 	}

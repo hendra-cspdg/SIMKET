@@ -17,10 +17,10 @@ class ReportMe
                 GROUP BY unitkerja
                 ORDER BY point DESC, jumlah_target DESC, jumlah_kegiatan DESC";
 
-        if(Yii::app()->user->getUnitKerja()!=1)
-        {
-            $sql.=" LIMIT 5";
-        }
+        // if(Yii::app()->user->getUnitKerja()!=1)
+        // {
+        //     $sql.=" LIMIT 5";
+        // }
 
         return Yii::app()->db->createCommand($sql)->queryAll();
     }
@@ -94,10 +94,49 @@ class ReportMe
                 GROUP BY unitkerja
                 ORDER BY point DESC, jumlah_target DESC, jumlah_kegiatan DESC";
 
-        if(Yii::app()->user->getUnitKerja()!=1)
-        {
-            $sql.=" LIMIT 5";
-        }
+        // if(Yii::app()->user->getUnitKerja()!=1)
+        // {
+        //     $sql.=" LIMIT 5";
+        // }
+
+        return Yii::app()->db->createCommand($sql)->queryAll();
+    }
+
+    public static function RekapNilai($year, $month)
+    {
+        $sql="SELECT COUNT(p.id) as jumlah_kegiatan, 
+                    SUM(target) as jumlah_target ,
+                    
+                    SUM(timelines_point) as jumlah_point,
+                    (SUM(timelines_point)/COUNT(p.id)) as point, 
+
+
+                    SUM(CASE WHEN k.unit_kerja IN (SELECT id FROM unit_kerja WHERE parent = 13) THEN timelines_point ELSE 0 END) as total_produksi,
+                    SUM(CASE WHEN k.unit_kerja IN (SELECT id FROM unit_kerja WHERE parent = 13) THEN 1 ELSE 0 END) as jumlah_produksi,
+
+
+                    SUM(CASE WHEN k.unit_kerja IN (SELECT id FROM unit_kerja WHERE parent = 2) THEN timelines_point ELSE 0 END) as total_ipds,
+                    SUM(CASE WHEN k.unit_kerja IN (SELECT id FROM unit_kerja WHERE parent = 2) THEN 1 ELSE 0 END) as jumlah_ipds,
+
+                    SUM(CASE WHEN k.unit_kerja IN (SELECT id FROM unit_kerja WHERE parent = 5) THEN timelines_point ELSE 0 END) as total_sosial,
+                    SUM(CASE WHEN k.unit_kerja IN (SELECT id FROM unit_kerja WHERE parent = 5) THEN 1 ELSE 0 END) as jumlah_sosial,
+
+                    SUM(CASE WHEN k.unit_kerja IN (SELECT id FROM unit_kerja WHERE parent = 28) THEN timelines_point ELSE 0 END) as total_tu,
+                    SUM(CASE WHEN k.unit_kerja IN (SELECT id FROM unit_kerja WHERE parent = 28) THEN 1 ELSE 0 END) as jumlah_tu,
+
+                    SUM(CASE WHEN k.unit_kerja IN (SELECT id FROM unit_kerja WHERE parent = 38) THEN timelines_point ELSE 0 END) as total_distribusi,
+                    SUM(CASE WHEN k.unit_kerja IN (SELECT id FROM unit_kerja WHERE parent = 38) THEN 1 ELSE 0 END) as jumlah_distribusi,
+
+                    SUM(CASE WHEN k.unit_kerja IN (SELECT id FROM unit_kerja WHERE parent = 34) THEN timelines_point ELSE 0 END) as total_neraca,
+                    SUM(CASE WHEN k.unit_kerja IN (SELECT id FROM unit_kerja WHERE parent = 34) THEN 1 ELSE 0 END) as jumlah_neraca,
+                
+                    unitkerja, u.code, u.name 
+                
+                FROM `participant` p, unit_kerja u, kegiatan k 
+                WHERE u.id=p.unitkerja AND k.id=p.kegiatan 
+                AND YEAR(end_date)={$year} AND MONTH(end_date)={$month} 
+                GROUP BY unitkerja
+                ORDER BY u.code";
 
         return Yii::app()->db->createCommand($sql)->queryAll();
     }
@@ -124,7 +163,7 @@ class ReportMe
                     'keyField' => 'id', 
                     'totalItemCount' => $count,
                     'pagination' => array(
-                        'pageSize' => 15,
+                        'pageSize' => $count,
                     ),
                 ));
 

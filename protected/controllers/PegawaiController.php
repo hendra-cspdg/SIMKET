@@ -76,9 +76,35 @@ class PegawaiController extends Controller
 		if(isset($_POST['Pegawai']))
 		{
 			$model->attributes=$_POST['Pegawai'];
+			if(Yii::app()->user->getLevel()==2){
+				$model->unit_kerja = Yii::app()->user->getUnitKerja();	
+			}
+
 			$model->unit_kerja_kab=$_POST['Pegawai']['unit_kerja_kab'];
-			if($model->save())
+
+			$temp_file;
+			$ext_name = array('', '');
+
+			if(strlen(trim(CUploadedFile::getInstance($model,'foto'))) > 0)
+			{
+				$temp_file = CUploadedFile::getInstance($model,'foto');
+				$ext_name = explode('.',basename($temp_file));
+			}
+			else{
+				$model->foto = '';
+			}
+
+			if($model->save()){
+				if(strlen($ext_name[1]) > 0)
+				{
+					$fname = $model->nip.'.'.$ext_name[1];
+					if($temp_file->saveAs(Yii::app()->basePath.'/../upload/temp/pegawai/' . $fname)){
+						$model->foto = $fname;
+						$model->save(false);
+					}
+				}
 				$this->redirect(array('view','id'=>$model->nip));
+			}
 		}
 
 		$this->render('create',array(
@@ -100,10 +126,38 @@ class PegawaiController extends Controller
 
 		if(isset($_POST['Pegawai']))
 		{
+			$old_foto = $model->foto;
 			$model->attributes=$_POST['Pegawai'];
+			if(Yii::app()->user->getLevel()==2){
+				$model->unit_kerja = Yii::app()->user->getUnitKerja();	
+			}
 			$model->unit_kerja_kab = $_POST['Pegawai']['unit_kerja_kab'];
-			if($model->save())
+
+			$temp_file;
+			$ext_name = array('', '');
+
+			if(strlen(trim(CUploadedFile::getInstance($model,'foto'))) > 0)
+			{
+				$temp_file = CUploadedFile::getInstance($model,'foto');
+				$ext_name = explode('.',basename($temp_file));
+			}
+
+			if($model->save()){
+				if(strlen($ext_name[1]) > 0)
+				{
+					$fname = $model->nip.'.'.$ext_name[1];
+					if($temp_file->saveAs(Yii::app()->basePath.'/../upload/temp/pegawai/' . $fname)){
+						$model->foto = $fname;
+						$model->save(false);
+					}
+				}
+				else{
+					$model->foto = $old_foto;
+					$model->save(false);
+				}
+
 				$this->redirect(array('view','id'=>$model->nip));
+			}
 		}
 
 		$this->render('update',array(
@@ -118,11 +172,15 @@ class PegawaiController extends Controller
 	 */
 	public function actionDelete($id)
 	{
-		$this->loadModel($id)->delete();
+		$model = $this->loadModel($id);
+		$model->is_active = 0;
+		$model->save(false);
 
-		// if AJAX request (triggered by deletion via admin grid view), we should not redirect the browser
-		if(!isset($_GET['ajax']))
-			$this->redirect(isset($_POST['returnUrl']) ? $_POST['returnUrl'] : array('admin'));
+		echo CJSON::encode(array
+		(
+				'satu'=>'',
+		));
+		Yii::app()->end();
 	}
 
 	/**
@@ -132,10 +190,15 @@ class PegawaiController extends Controller
 	{
 		$model=new Pegawai('search');
 		$model->unsetAttributes();  // clear any default values
-		if(isset($_POST['Pegawai']))
-			$model->attributes=$_POST['Pegawai'];
+		if(isset($_GET['Pegawai']))
+			$model->attributes=$_GET['Pegawai'];
 
-		$model->unit_kerja = 22;
+		// $model->unit_kerja = 22;
+		$model->is_active = 1;
+
+		if(Yii::app()->user->isKabupaten()==1){
+			$model->unit_kerja = Yii::app()->user->unitKerja;
+		}
 
 		$this->render('admin',array(
 			'model'=>$model,
@@ -146,10 +209,13 @@ class PegawaiController extends Controller
 	{
 		$model=new Pegawai('search');
 		$model->unsetAttributes();  // clear any default values
-		if(isset($_POST['Pegawai']))
-			$model->attributes=$_POST['Pegawai'];
+		if(isset($_GET['Pegawai']))
+			$model->attributes=$_GET['Pegawai'];
+		// $model->unit_kerja = 22;
 
-		$model->unit_kerja = 22;
+		if(Yii::app()->user->isKabupaten()==1){
+			$model->unit_kerja = Yii::app()->user->unitKerja;
+		}
 
 		$this->render('rapor',array(
 			'model'=>$model,

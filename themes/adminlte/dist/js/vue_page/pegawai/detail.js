@@ -10,6 +10,21 @@ $(document).ready(function () {
     callDonutChart();
 });
 
+$("#btn-delete").click(function(){
+    if (confirm("Apakah anda yakin ingin menghapus data ini?")) {
+        const idnya = $(this).attr('dataid');
+        $.ajax({
+            url: pathname+"?r=pegawai/delete&id=" + idnya,
+            type:"post",
+            dataType :"json",
+            success : function(data)
+            {
+                window.location.href=pathname+ "?r=pegawai/index"
+            }
+        });
+    }
+});
+
 function callDonutChart(){
     $(".donut-chart").each(function() {
         setDonutChart($(this).attr('id'));
@@ -22,8 +37,8 @@ function setDonutChart(id_chart){
     var donutData = [
         {label: chartEl.data('optone'), data: chartEl.data('one'), color: "#DD5245"},
         {label: chartEl.data('opttwo'), data: chartEl.data('two'), color: "#F5CD46"},
-        {label: chartEl.data('optthree'), data: chartEl.data('three'), color: "#0E58E3"},
-        {label: chartEl.data('optfour'), data: chartEl.data('four'), color: "#5BA05C"}
+        {label: chartEl.data('optthree'), data: chartEl.data('three'), color: "#5BA05C"},
+        {label: chartEl.data('optfour'), data: chartEl.data('four'), color: "#0E58E3"}
     ];
 
       $.plot("#"+id_chart, donutData, {

@@ -17,6 +17,20 @@
  */
 class MitraBps extends HelpAr
 {
+	//pendidikan: 1=tidak sekolah/tidak tamat SD,
+	//2=SD, 3=SMP, 4=SMA, 5=D3 atau sederajat, 6=S1 atau sederajat, 7=S2 atau S3
+	public static function getPendidikanDropdown(){
+		return array(
+			1=>'Tidak sekolah/tidak tamat SD',
+			2=> 'SD',
+			3=> 'SMP',
+			4=> 'SMA',
+			5=> 'D1, D3 atau sederajat',
+			6=> 'S1, D4 atau sederajat',
+			7=> 'S2 atau S3',
+		);
+	}
+
 	/**
 	 * @return string the associated database table name
 	 */
@@ -37,6 +51,7 @@ class MitraBps extends HelpAr
 			array('jk, kab_id, created_by', 'numerical', 'integerOnly'=>true),
 			array('nama', 'length', 'max'=>255),
 			array('nomor_telepon', 'length', 'max'=>15),
+			array('foto', 'file', 'types'=>'jpg, png', 'allowEmpty'=>true, 'maxSize'=>1024*100),
 			array('alamat, tanggal_lahir', 'safe'),
 			// The following rule is used by search().
 			// @todo Please remove those attributes that should not be searched.
@@ -56,6 +71,18 @@ class MitraBps extends HelpAr
 		);
 	}
 
+	public function getFotoImage(){
+		// if($this->is_black==1){
+		// 	return Yii::app()->baseUrl.'/upload/temp/mitra_foto/black.png';
+		// }
+		// else{
+			if($this->foto!==''){
+				return Yii::app()->baseUrl.'/upload/temp/mitra_foto/' . $this->foto;
+			}
+		// }
+		return Yii::app()->theme->baseUrl.'/dist/img/avatar.png';
+	}
+
 	/**
 	 * @return array customized attribute labels (name=>label)
 	 */
@@ -69,11 +96,16 @@ class MitraBps extends HelpAr
 			'alamat' => 'Alamat',
 			'tanggal_lahir' => 'Tanggal Lahir',
 			'jk' => 'Jenis Kelamin',
+			'unit_kerja_id'	=>	'Seksi/Subbagian',
 			'created_time' => 'Created Time',
 			'updated_time' => 'Updated Time',
 			'created_by' => 'Created By',
 			'updated_by' => 'Updated By',
-			'riwayat'	=> 'Riwayat Kerja'
+			'riwayat'	=> 'Riwayat Kerja',
+			'pendidikan'	=>'Pendidikan Terakhir',
+			'foto'	=>'Foto (ukuran maksimal 100kb)',
+			'is_black'	=> 'Tandai Sebagai Mitra Hitam?',
+			'black_note'	=>'Catatan Mitra',
 		);
 	}
 
@@ -89,7 +121,7 @@ class MitraBps extends HelpAr
 	 * @return CActiveDataProvider the data provider that can return the models
 	 * based on the search/filter conditions.
 	 */
-	public function search()
+	public function search($is_raport=false)
 	{
 		// @todo Please modify the following code to remove attributes that should not be searched.
 
@@ -106,9 +138,58 @@ class MitraBps extends HelpAr
 		$criteria->compare('updated_time',$this->updated_time,true);
 		$criteria->compare('created_by',$this->created_by);
 		$criteria->compare('updated_by',$this->updated_by,true);
+		$criteria->compare('is_active',$this->is_active,true);
+		$criteria->compare('is_black',$this->is_black,true);
+
+		if($is_raport){
+			$criteria->order = 'nilai_menjadi_mitra DESC, total_menjadi_mitra DESC';
+		}
 
 		return new CActiveDataProvider($this, array(
 			'criteria'=>$criteria,
+		));
+	}
+
+	public function searchRecommended($is_raport=false)
+	{
+		// @todo Please modify the following code to remove attributes that should not be searched.
+
+		$criteria=new CDbCriteria;
+
+		$criteria->compare('nama',$this->nama,true);
+		$criteria->compare('kab_id',$this->kab_id);
+		$criteria->compare('is_black',$this->is_black,true);
+		$criteria->addCondition('nilai_menjadi_mitra>=3');
+
+		if($is_raport){
+			$criteria->order = 'nilai_menjadi_mitra DESC, total_menjadi_mitra DESC';
+		}
+
+		return new CActiveDataProvider($this, array(
+			'criteria'=>$criteria,
+		));
+	}
+
+	public function searchAll($is_raport=false)
+	{
+		// @todo Please modify the following code to remove attributes that should not be searched.
+
+		$criteria=new CDbCriteria;
+
+		$criteria->compare('nama',$this->nama,true);
+		$criteria->compare('kab_id',$this->kab_id);
+		$criteria->compare('is_active',$this->is_active,true);
+
+		if($is_raport){
+			$criteria->order = 'nilai_menjadi_mitra DESC, total_menjadi_mitra DESC';
+		}
+
+		return new CActiveDataProvider($this, array(
+			'criteria'=>$criteria,
+			'totalItemCount'=>$this->count(),
+			'pagination'=>array(
+				'pageSize'=>$this->count(),
+			 ),
 		));
 	}
 
@@ -121,6 +202,27 @@ class MitraBps extends HelpAr
 	public static function model($className=__CLASS__)
 	{
 		return parent::model($className);
+	}
+
+
+	public function getPredikatLabel(){
+		if($this->total_menjadi_mitra>0){
+			if($this->nilai_menjadi_mitra <= 1.65){ 
+				return "Buruk";
+			}
+			else if($this->nilai_menjadi_mitra > 1.66 && $this->nilai_menjadi_mitra<= 2.65){  
+				return "Cukup"; 
+			}
+			else if($this->nilai_menjadi_mitra > 2.66 && $this->nilai_menjadi_mitra<= 3.65){  
+				return "Baik";
+			}
+			else if($this->nilai_menjadi_mitra > 3.65){  
+				return "Amat Baik";
+			}
+		}
+		else{
+			return "-";
+		}
 	}
 
 	public function getNilaiAndJumlah(){

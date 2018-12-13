@@ -36,13 +36,15 @@ class Kegiatan_mitraController extends Controller
 					'insert_petugas', 'delete_petugas',
 					'get_list_mitra',
 					'nilai', 'resume', 'get_list_wilayah',
-					'delete_wilayah', 'add_single_wilayah'),
-				'users'=>array('@'),
+					'delete_wilayah', 'add_single_wilayah', 'form'),
+				'expression'=> function($user){
+					return $user->getLevel()<=2;
+				},
 			),
 			array('allow', // allow admin user to perform 'admin' and 'delete' actions
 				'actions'=>array('admin','delete'),
 				'expression'=> function($user){
-					return $user->getLevel()<=1;
+					return $user->getLevel()<=2;
 				},
 			),
 			array('deny',  // deny all users
@@ -238,7 +240,9 @@ class Kegiatan_mitraController extends Controller
 		if(isset($_POST['KegiatanMitra']))
 		{
 			$model->attributes=$_POST['KegiatanMitra'];
-			$model->kab_id = 22;
+			if(Yii::app()->user->getLevel()==2){
+				$model->kab_id = Yii::app()->user->getUnitKerja();	
+			}
 			$model->induk_id = 15;
 			if($model->save())
 				$this->redirect(array('mitra', 'id'=>$model->id));
@@ -246,6 +250,35 @@ class Kegiatan_mitraController extends Controller
 
 		$this->render('create',array(
 			'model'=>$model,
+		));
+	}
+
+	public function actionForm($id)
+	{
+		$model=$this->loadModel($id);
+
+		if(isset($_POST['par_post'])){
+			$all_pertanyaan = MitraPertanyaan::model()->findAll();
+			
+			foreach($all_pertanyaan as $key=>$value){
+				if(isset($_POST['form'.$value['id']])){
+					///
+					$new_soal = new KegiatanMitraPertanyaan;
+					$new_soal->kegiatan_mitra_id = $id;
+					$new_soal->mitra_pertanyaan_id =  $value['id'];
+					if(isset($_POST['wil'.$value['id']]))
+						$new_soal->is_per_wilayah = 1;
+					$new_soal->save();
+					//
+				}
+			}
+
+			$model->is_set_form = 1;
+			$model->save();
+		}
+
+		$this->render('form',array(
+			'model'		=>$model
 		));
 	}
 
@@ -274,27 +307,64 @@ class Kegiatan_mitraController extends Controller
 	{
 		$is_simpan = false;
 		$model=$this->loadModelPetugas($id);
-		$questions = MitraPertanyaan::model()->findAll(
-			'teruntuk=:t1 OR teruntuk=:t2', array(':t1'=>$model->status, ':t2'=>3)
-		);
+		$questions = KegiatanMitraPertanyaan::model()->findAllByAttributes(array(
+			'kegiatan_mitra_id'	=>$model->id_kegiatan,
+		));
+
+		// $questions = MitraPertanyaan::model()->findAll(
+		// 	'teruntuk=:t1 OR teruntuk=:t2', array(':t1'=>$model->status, ':t2'=>3)
+		// );
 
 		if(isset($_POST))
 		{
-			foreach ($questions as $key => $value)
+			foreach ($questions as $kkey => $kvalue)
 			{
+				$value = MitraPertanyaan::model()->find(
+					'id=:t0 AND (teruntuk=:t1 OR teruntuk=:t2)', array(':t0'=>$kvalue->mitra_pertanyaan_id ,':t1'=>$model->status, ':t2'=>3)
+				);
 
-				if($value['id']==11 || $value['id']==12 || $value['id']==15){
-					$wilayah = KegiatanMitraWilayah::model()->findAllByAttributes(array(
-						'kmp_id'	=>$model->id //this field refer to id_mitra in kegiatan NOT ID PEGAWAI/MITRA MASTER
-					));
-					foreach ($wilayah as $key_wil => $value_wil)
-					{
-						if(isset($_POST['opts'.$value['id'].'_'.$value_wil['id']])){
+
+				if($value!==null){
+					if($kvalue->is_per_wilayah==1){
+						$wilayah = KegiatanMitraWilayah::model()->findAllByAttributes(array(
+							'kmp_id'	=>$model->id //this field refer to id_mitra in kegiatan NOT ID PEGAWAI/MITRA MASTER
+						));
+						foreach ($wilayah as $key_wil => $value_wil)
+						{
+							if(isset($_POST['opts'.$value['id'].'_'.$value_wil['id']])){
+								$nilai = MitraNilai::model()->findByAttributes(
+									array(
+										'mitra_id'		=>$id, //this field refer to id_mitra in kegiatan NOT ID PEGAWAI/MITRA MASTER
+										'pertanyaan_id'	=>$value['id'],
+										'wilayah_id'	=>$value_wil['id']
+									)
+								);
+			
+								if($nilai==null){
+									$nilai = new MitraNilai;
+									$nilai->mitra_id = $id;
+									$nilai->kegiatan_id = $model->id_kegiatan;
+									$nilai->pertanyaan_id = $value['id'];
+									$nilai->nilai = $_POST['opts'.$value['id'].'_'.$value_wil['id']];
+									$nilai->wilayah_id = $value_wil['id'];
+									$nilai->save();
+			
+									$is_simpan = true;
+								}
+								else{
+									$nilai->nilai = $_POST['opts'.$value['id'].'_'.$value_wil['id']];
+									$nilai->save();
+									$is_simpan = true;
+								}
+							}
+						}
+					}
+					else{
+						if(isset($_POST['opts'.$value['id']])){
 							$nilai = MitraNilai::model()->findByAttributes(
 								array(
 									'mitra_id'		=>$id, //this field refer to id_mitra in kegiatan NOT ID PEGAWAI/MITRA MASTER
-									'pertanyaan_id'	=>$value['id'],
-									'wilayah_id'	=>$value_wil['id']
+									'pertanyaan_id'	=>$value['id']
 								)
 							);
 		
@@ -303,49 +373,26 @@ class Kegiatan_mitraController extends Controller
 								$nilai->mitra_id = $id;
 								$nilai->kegiatan_id = $model->id_kegiatan;
 								$nilai->pertanyaan_id = $value['id'];
-								$nilai->nilai = $_POST['opts'.$value['id'].'_'.$value_wil['id']];
-								$nilai->wilayah_id = $value_wil['id'];
+								$nilai->nilai = $_POST['opts'.$value['id']];
 								$nilai->save();
 		
 								$is_simpan = true;
 							}
 							else{
-								$nilai->nilai = $_POST['opts'.$value['id'].'_'.$value_wil['id']];
+								$nilai->nilai = $_POST['opts'.$value['id']];
 								$nilai->save();
 								$is_simpan = true;
 							}
 						}
 					}
 				}
-				else{
-					if(isset($_POST['opts'.$value['id']])){
-						$nilai = MitraNilai::model()->findByAttributes(
-							array(
-								'mitra_id'		=>$id, //this field refer to id_mitra in kegiatan NOT ID PEGAWAI/MITRA MASTER
-								'pertanyaan_id'	=>$value['id']
-							)
-						);
-	
-						if($nilai==null){
-							$nilai = new MitraNilai;
-							$nilai->mitra_id = $id;
-							$nilai->kegiatan_id = $model->id_kegiatan;
-							$nilai->pertanyaan_id = $value['id'];
-							$nilai->nilai = $_POST['opts'.$value['id']];
-							$nilai->save();
-	
-							$is_simpan = true;
-						}
-						else{
-							$nilai->nilai = $_POST['opts'.$value['id']];
-							$nilai->save();
-							$is_simpan = true;
-						}
-					}
-				}
 			}
 
-			$model->nilai = ($model->totalNilai/$model->totalPertanyaan);
+			if($model->totalPertanyaan==0 || $model->totalNilai==0)
+				$model->nilai = 0;
+			else
+				$model->nilai = ($model->totalNilai/$model->totalPertanyaan);
+			
 			$model->save();
 		}
 
@@ -371,6 +418,10 @@ class Kegiatan_mitraController extends Controller
 		if(isset($_POST['KegiatanMitra']))
 		{
 			$model->attributes=$_POST['KegiatanMitra'];
+
+			if(Yii::app()->user->getLevel()==2){
+				$model->kab_id = Yii::app()->user->getUnitKerja();	
+			}
 			if($model->save())
 				$this->redirect(array('mitra','id'=>$model->id));
 		}
@@ -387,11 +438,26 @@ class Kegiatan_mitraController extends Controller
 	 */
 	public function actionDelete($id)
 	{
-		$this->loadModel($id)->delete();
+		$msg = '';
+		$model = $this->loadModel($id);
+
+		if(Yii::app()->user->getLevel()==1 || ($model->kab_id==Yii::app()->user->getUnitKerja())){
+			$model->is_active = 0;
+			$model->save(false);
+		}
+		else{
+			$msg = 'Anda tidak berhak menghapus data ini!';
+		}
 
 		// if AJAX request (triggered by deletion via admin grid view), we should not redirect the browser
-		if(!isset($_GET['ajax']))
-			$this->redirect(isset($_POST['returnUrl']) ? $_POST['returnUrl'] : array('admin'));
+		// if(!isset($_GET['ajax']))
+		// 	$this->redirect(isset($_POST['returnUrl']) ? $_POST['returnUrl'] : array('admin'));
+
+		echo CJSON::encode(array
+		(
+			'satu'=>$msg,
+		));
+		Yii::app()->end();
 	}
 
 	/**
@@ -401,8 +467,11 @@ class Kegiatan_mitraController extends Controller
 	{
 		$model=new KegiatanMitra('search');
 		$model->unsetAttributes();  // clear any default values
+
 		if(isset($_GET['KegiatanMitra']))
 			$model->attributes=$_GET['KegiatanMitra'];
+
+		$model->is_active = 1;
 
 		$this->render('admin',array(
 			'model'=>$model,

@@ -7,6 +7,7 @@
 	// There is a call to performAjaxValidation() commented in generated controller code.
 	// See class documentation of CActiveForm for details on this.
 	'enableAjaxValidation'=>false,
+	'htmlOptions'=>array('enctype'=>'multipart/form-data'),
 )); ?>
 
 	<p class="note">Fields with <span class="required">*</span> are required.</p>
@@ -19,7 +20,15 @@
 		<?php echo $form->error($model,'nama'); ?>
 	</div>
 
+	<div class="form-group">
+		<?php echo $form->labelEx($model,'unit_kerja_id'); ?>
+		<?php echo $form->dropDownList($model,'unit_kerja_id',
+				CHtml::listData(UnitKerjaDaerah::model()->findAll('id NOT IN(1,2)'), 'id', 'nama'),
+				array('empty'=>'- Pilih Seksi/Subbagian -', 'class'=>"form-control")); ?>
+		<?php echo $form->error($model,'unit_kerja_id'); ?>
+	</div>
 
+	<?php if(Yii::app()->user->getLevel()==1){ ?>
 	<div class="form-group">
 		<?php echo $form->labelEx($model,'kab_id'); ?>
 		<?php echo $form->dropDownList($model,'kab_id',
@@ -27,6 +36,7 @@
 				array('empty'=>'- Pilih Kabupaten -', 'class'=>"form-control")); ?>
 		<?php echo $form->error($model,'kab_id'); ?>
 	</div>
+	<?php } ?>
 
 	<div class="form-group">
 		<?php echo $form->labelEx($model,'nomor_telepon'); ?>
@@ -66,10 +76,30 @@
 		<?php echo $form->error($model,'jk'); ?>
 	</div>
 
+
+	<div class="form-group">
+		<?php echo $form->labelEx($model,'pendidikan'); ?>
+		<?php echo $form->dropDownList($model,'pendidikan',
+				$model->pendidikanDropdown,
+				array('empty'=>'- Pendidikan Terakhir -', 'class'=>"form-control")); ?>
+		<?php echo $form->error($model,'pendidikan'); ?>
+	</div>
+
 	<div class="form-group">
 		<?php echo $form->labelEx($model,'riwayat'); ?>
 		<?php echo $form->textArea($model,'riwayat',array('rows'=>6, 'cols'=>50, 'class'=>"form-control")); ?>
 		<?php echo $form->error($model,'riwayat'); ?>
+	</div>
+
+	<div class="form-group">
+		<?php echo $form->labelEx($model,'foto'); ?>
+		<?php echo $form->fileField($model,'foto',array('rows'=>6, 'cols'=>50, 'class'=>"form-control")); ?>
+		<?php echo $form->error($model,'foto'); ?>
+		<?php 
+			if(!$model->isNewRecord && strlen($model->foto)>0){
+				echo '<br/><img width="100" src="'.$model->fotoImage.'" alt="User Image">';
+			}
+		?>
 	</div>
 
 	<div class="box-footer">

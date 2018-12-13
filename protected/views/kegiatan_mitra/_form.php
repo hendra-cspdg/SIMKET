@@ -11,30 +11,35 @@
 				<a href="#step-1" type="button" class="btn btn-primary btn-circle">1</a>
 				<p>Data Kegiatan</p>
 			</div>
+
 			<div class="stepwizard-step">
 				<?php if($model->isNewRecord){ ?>
 					<a href="#step-2" type="button" class="btn btn-default btn-circle" disabled="disabled">2</a>
 				<?php }else{ 
-						echo CHtml::link("2", array('mitra', 'id'=>$model->id), array('class'=>'btn btn-default btn-circle'));
+						echo CHtml::link("2", array('form', 'id'=>$model->id), array('class'=>'btn btn-default btn-circle'));
 					}
 				?>
-				<p>Petugas Lapangan</p>
+				<p>Kelola Pertanyaan</p>
 			</div>
 			<div class="stepwizard-step">
 				<?php if($model->isNewRecord){ ?>
 					<a href="#step-3" type="button" class="btn btn-default btn-circle" disabled="disabled">3</a>
 				<?php }else{ 
-						echo CHtml::link("3", array("skoring", 'id'=>$model->id), array('class'=>'btn btn-default btn-circle'));
+						echo CHtml::link("3", array('mitra', 'id'=>$model->id), array('class'=>'btn btn-default btn-circle'));
 					}
 				?>
+				<p>Petugas Lapangan</p>
+			</div>
+			<div class="stepwizard-step">
+				<a href="#step-4" type="button" class="btn btn-default btn-circle" disabled="disabled">4</a>
 				<p>Skoring Petugas</p>
 			</div>
 
 			<div class="stepwizard-step">
 				<?php if($model->isNewRecord){ ?>
-					<a href="#step-4" type="button" class="btn btn-default btn-circle" disabled="disabled">4</a>
+					<a href="#step-5" type="button" class="btn btn-default btn-circle" disabled="disabled">5</a>
 				<?php }else{ 
-						echo CHtml::link("4", array("resume", 'id'=>$model->id), array('class'=>'btn btn-default btn-circle'));
+						echo CHtml::link("5", array("resume", 'id'=>$model->id), array('class'=>'btn btn-default btn-circle'));
 					}
 				?>
 				<p>Resume Kegiatan</p>
@@ -85,6 +90,7 @@
 						</div>
 						-->
 
+						<?php if(Yii::app()->user->getLevel()==1 && $model->isNewRecord){ ?>
 						<div class="form-group">
 							<?php echo $form->labelEx($model,'kab_id'); ?>
 							<?php 
@@ -94,10 +100,36 @@
 							?>
 							<?php echo $form->error($model,'kab_id'); ?>
 						</div> 
+						<?php } ?>
 
+
+						<?php if(!$model->isNewRecord){ 
+							$options_arr = 	array('empty'=>'- Pilih Kabupaten/Kota-', 'class'=>"form-control");
+							if(Yii::app()->user->getLevel()==2)
+								$options_arr = array('empty'=>'- Pilih Kabupaten/Kota-', 'class'=>"form-control", 'disabled'=>'disabled');
+
+						?>
+							<div class="form-group">
+								<?php echo $form->labelEx($model,'kab_id'); ?>
+								<?php 
+									echo $form->dropDownList($model,'kab_id',
+							CHtml::listData(HelpMe::getListKabupaten(), 'id', 'label'), $options_arr); 
+								?>
+								<?php echo $form->error($model,'kab_id'); ?>
+							</div> 
+						<?php } ?>
+
+						<?php if($model->isNewRecord){ ?>
 						<div class="box-footer">
 							<?php echo CHtml::submitButton('Simpan', array('class'=>'btn btn-primary nextBtn btn-lg pull-right')); ?>
 						</div>
+						<?php }else{
+							if(HelpMe::isAuthorizeUnitKerja($model->kab_id)){ ?>
+
+							<div class="box-footer">
+								<?php echo CHtml::submitButton('Simpan', array('class'=>'btn btn-primary nextBtn btn-lg pull-right')); ?>
+							</div>
+						<?php }} ?>
 
 					<?php $this->endWidget(); ?>
 				</div>

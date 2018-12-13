@@ -100,6 +100,7 @@ class KegiatanMitra extends HelpAr
 		$criteria->compare('created_time',$this->created_time,true);
 		$criteria->compare('updated_by',$this->updated_by);
 		$criteria->compare('updated_time',$this->updated_time,true);
+		$criteria->compare('is_active',$this->is_active);
 
 		return new CActiveDataProvider($this, array(
 			'criteria'=>$criteria,
@@ -119,18 +120,23 @@ class KegiatanMitra extends HelpAr
 			$nama = "";
 			$nip = "";
 			$status = "PCL";
+			$foto = Yii::app()->baseUrl.'/upload/temp/mitra_foto/black.png';
+			$list_wilayah = '';
+			$btn_wilayah = '';
 
 			if($value['flag_mitra']==1){
 				$petugas = Pegawai::model()->findByPk($value['id_mitra']);	
 				if($petugas!==null){
 					$nama = $petugas->nama;
 					$nip = $petugas->nip;
+					$foto = $petugas->fotoImage;
 				}
 			}
 			else{
 				$petugas = MitraBps::model()->findByPk($value['id_mitra']);	
 				if($petugas!==null){
 					$nama = $petugas->nama;
+					$foto = $petugas->fotoImage;
 				}
 			}
 
@@ -142,12 +148,12 @@ class KegiatanMitra extends HelpAr
 					'kmp_id'	=>$value['id']
 				));
 
-				$status .= "<p><b> <u>Wilayah Tugas</u></b></p>";
+				$list_wilayah .= "<p><b> <u>Wilayah Tugas</u></b></p>";
 				foreach($wilayah as $key_wil => $val_wil){
-					$status .="<p>- NKS: ".$val_wil['nks'].", NBS: ".$val_wil['bs']."</p>";
+					$list_wilayah .="<p>- NKS: ".$val_wil['nks'].", NBS: ".$val_wil['bs']."</p>";
 				}
 
-				$status.=('[<a href="#modalUpdate" role="button" class="update_wilayah" 
+				$btn_wilayah =('[<a href="#modalUpdate" role="button" class="update_wilayah" 
 				data-id="'.$value['id'].'" 
 				data-nama="'.$nama.'" 
 				data-mitra_id="'.$value['id_mitra'].'" 
@@ -157,11 +163,14 @@ class KegiatanMitra extends HelpAr
 			$result[] = array(
 				'id'		=>$value['id'],
 				'id_mitra'	=>$value['id_mitra'],
+				'foto'		=>$foto,
 				'nama'		=>$nama,
 				'nip'		=>$nip,
 				'status'	=>$status,
 				'flag'		=>$value['flag_mitra'],
-				'nilai'		=>$value['nilai']
+				'nilai'		=>$value['nilai'],
+				'list_wilayah'	=>$list_wilayah,
+				'btn_wilayah'	=>$btn_wilayah
 			);
 		}
 
@@ -211,8 +220,9 @@ class KegiatanMitra extends HelpAr
 					(SELECT o.description FROM mitra_option o WHERE o.id_pertanyaan=pertanyaan_id AND o.skala=4 LIMIT 1) as opt4
 					
 					FROM `mitra_nilai` m, 
-					mitra_pertanyaan p
+					mitra_pertanyaan p, kegiatan_mitra_pertanyaan kmp
 					WHERE 
+						kmp.mitra_pertanyaan_id = p.id AND 
 						m.pertanyaan_id=p.id  AND kegiatan_id = $idnya 
 					GROUP BY pertanyaan_id";
 

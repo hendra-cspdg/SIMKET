@@ -135,3 +135,62 @@ td.w50 {
 .scrollme {
   overflow-y: auto;
 }
+
+
+li.li1
+{
+  background-color: #DD5245;
+}
+
+li.li2
+{
+  background-color: #F5CD46;
+}
+
+li.li3
+{
+  background-color: #5BA05C;
+}
+
+li.li4
+{
+  background-color: #0E58E3;
+}
+
+
+tr.bps1 > td.color
+{
+  background-color: #DD5245;
+}
+
+tr.bps2 > td.color
+{
+  background-color: #F5CD46;
+}
+
+tr.bps3 > td.color
+{
+  background-color: #5BA05C;
+}
+
+tr.bps4 > td.color
+{
+  background-color: #0E58E3;
+}
+
+.bg-full {
+  background: url('../img/cover_1604.png');
+  background-size: 100%;
+}
+
+img.img-profile{
+  width: 100%;
+}
+
+.login-icon{
+  text-align: center;
+}
+
+.login-icon > img{
+  width: 120px;
+}

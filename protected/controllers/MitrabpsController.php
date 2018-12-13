@@ -28,22 +28,52 @@ class MitrabpsController extends Controller
 	{
 		return array(
 			array('allow',  // allow all users to perform 'index' and 'view' actions
-				'actions'=>array('index','view'),
+				'actions'=>array('index'),
 				'expression'=> function($user){
 					return $user->getLevel()<=2;
 				},
 			),
 			array('allow', // allow authenticated user to perform 'create' and 'update' actions
 				'actions'=>array('create','update', 'delete',
-					'rapor', 'detail'),
+					'rapor', 'detail', 'black', 'blacklist'),
 				'expression'=> function($user){
 					return $user->getLevel()<=2;
 				},
 			),
+			array('allow', // allow authenticated user to perform 'create' and 'update' actions
+			'actions'=>array('dbase','view', 'recommended'),
+			'expression'=> function($user){
+				return true;
+			},
+		),
 			array('deny',  // deny all users
 				'users'=>array('*'),
 			),
 		);
+	}
+
+	public function actionBlack($id)
+	{
+		$model=$this->loadModel($id);
+		$model->is_black = 1;
+		
+		// Uncomment the following line if AJAX validation is needed
+		// $this->performAjaxValidation($model);
+
+		if(isset($_POST['MitraBps']))
+		{
+			// print_r($_POST['MitraBps']);die();
+			$model->is_black=$_POST['MitraBps']['is_black'];
+			$model->black_note=$_POST['MitraBps']['black_note'];
+
+			if($model->save()){
+				$this->redirect(array('view','id'=>$model->id));
+			}
+		}
+
+		$this->render('black',array(
+			'model'=>$model,
+		));
 	}
 
 	/**
@@ -78,10 +108,40 @@ class MitrabpsController extends Controller
 		if(isset($_POST['MitraBps']))
 		{
 			$model->attributes=$_POST['MitraBps'];
-			$model->kab_id=$_POST['MitraBps']['kab_id'];
+			if(Yii::app()->user->getLevel()==2){
+				$model->kab_id = Yii::app()->user->getUnitKerja();	
+			}
+			else{
+				$model->kab_id=$_POST['MitraBps']['kab_id'];
+			}
 			$model->riwayat=$_POST['MitraBps']['riwayat'];
-			if($model->save())
+			$model->pendidikan=$_POST['MitraBps']['pendidikan'];
+
+			$temp_file;
+			$ext_name = array('', '');
+
+			if(strlen(trim(CUploadedFile::getInstance($model,'foto'))) > 0)
+			{
+				$temp_file = CUploadedFile::getInstance($model,'foto');
+				$ext_name = explode('.',basename($temp_file));
+			}
+			else{
+				$model->foto = '';
+			}
+
+
+			if($model->save()){
+				if(strlen($ext_name[1]) > 0)
+				{
+					$fname = $model->id.'.'.$ext_name[1];
+					if($temp_file->saveAs(Yii::app()->basePath.'/../upload/temp/mitra_foto/' . $fname)){
+						$model->foto = $fname;
+						$model->save(false);
+					}
+				}
+
 				$this->redirect(array('view','id'=>$model->id));
+			}
 		}
 
 		$this->render('create',array(
@@ -103,11 +163,42 @@ class MitrabpsController extends Controller
 
 		if(isset($_POST['MitraBps']))
 		{
+			$old_foto = $model->foto;
 			$model->attributes=$_POST['MitraBps'];
-			$model->kab_id=$_POST['MitraBps']['kab_id'];
+			if(Yii::app()->user->getLevel()==2){
+				$model->kab_id = Yii::app()->user->getUnitKerja();	
+			}
+			else{
+				$model->kab_id=$_POST['MitraBps']['kab_id'];
+			}
 			$model->riwayat=$_POST['MitraBps']['riwayat'];
-			if($model->save())
+			$model->pendidikan=$_POST['MitraBps']['pendidikan'];
+
+			$temp_file;
+			$ext_name = array('', '');
+
+			if(strlen(trim(CUploadedFile::getInstance($model,'foto'))) > 0)
+			{
+				$temp_file = CUploadedFile::getInstance($model,'foto');
+				$ext_name = explode('.',basename($temp_file));
+			}
+
+			if($model->save()){
+				if(strlen($ext_name[1]) > 0)
+				{
+					$fname = $model->id.'.'.$ext_name[1];
+					if($temp_file->saveAs(Yii::app()->basePath.'/../upload/temp/mitra_foto/' . $fname)){
+						$model->foto = $fname;
+						$model->save(false);
+					}
+				}
+				else{
+					$model->foto = $old_foto;
+					$model->save(false);
+				}
+
 				$this->redirect(array('view','id'=>$model->id));
+			}
 		}
 
 		$this->render('update',array(
@@ -122,11 +213,22 @@ class MitrabpsController extends Controller
 	 */
 	public function actionDelete($id)
 	{
-		$this->loadModel($id)->delete();
+		$msg = '';
+		$model = $this->loadModel($id);
 
-		// if AJAX request (triggered by deletion via admin grid view), we should not redirect the browser
-		if(!isset($_GET['ajax']))
-			$this->redirect(isset($_POST['returnUrl']) ? $_POST['returnUrl'] : array('admin'));
+		if(Yii::app()->user->getLevel()==1 || ($model->kab_id==Yii::app()->user->getUnitKerja())){
+			$model->is_active = 0;
+			$model->save(false);
+		}
+		else{
+			$msg = 'Anda tidak berhak menghapus data ini!';
+		}
+
+		echo CJSON::encode(array
+		(
+				'satu'=>$msg,
+		));
+		Yii::app()->end();
 	}
 
 	/**
@@ -136,23 +238,76 @@ class MitrabpsController extends Controller
 	{
 		$model=new MitraBps('search');
 		$model->unsetAttributes();  // clear any default values
-		if(isset($_POST['MitraBps']))
-			$model->attributes=$_POST['MitraBps'];
+		if(isset($_GET['MitraBps']))
+			$model->attributes=$_GET['MitraBps'];
+
+		$model->is_active = 1;
+
+		if(Yii::app()->user->isKabupaten()==1){
+			$model->kab_id = Yii::app()->user->unitKerja;
+		}
 
 		$this->render('admin',array(
 			'model'=>$model,
 		));
 	}
 
-
 	public function actionRapor()
 	{
 		$model=new MitraBps('search');
 		$model->unsetAttributes();  // clear any default values
-		if(isset($_POST['MitraBps']))
-			$model->attributes=$_POST['MitraBps'];
+		if(isset($_GET['MitraBps']))
+			$model->attributes=$_GET['MitraBps'];
+
+		if(Yii::app()->user->isKabupaten()==1){
+			$model->kab_id = Yii::app()->user->unitKerja;
+		}
 
 		$this->render('rapor',array(
+			'model'=>$model,
+		));
+	}
+
+	public function actionDbase()
+	{
+		$model=new MitraBps('search');
+		$model->unsetAttributes();  // clear any default values
+		if(isset($_GET['MitraBps']))
+			$model->attributes=$_GET['MitraBps'];
+
+		$model->is_active = 1;
+
+		$this->render('dbase',array(
+			'model'=>$model,
+		));
+	}
+
+	public function actionRecommended()
+	{
+		$model=new MitraBps('search');
+		$model->unsetAttributes(); 
+		if(isset($_GET['MitraBps']))
+			$model->attributes=$_GET['MitraBps'];
+
+		$model->is_active = 1;
+		$model->is_black = 0;
+
+		$this->render('recommended',array(
+			'model'=>$model,
+		));
+	}
+
+	public function actionBlacklist()
+	{
+		$model=new MitraBps('search');
+		$model->unsetAttributes(); 
+		if(isset($_GET['MitraBps']))
+			$model->attributes=$_GET['MitraBps'];
+
+		$model->is_black = 1;
+		$model->is_active = 1;
+
+		$this->render('blacklist',array(
 			'model'=>$model,
 		));
 	}

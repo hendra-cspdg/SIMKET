@@ -27,41 +27,101 @@
           </li> -->
 
 
+          <!-- SIMKET -->
+          <!-- <li class="dropdown notifications-menu">
+            <a href="https://s.bps.go.id/simrapor">
+              SIM RAPOR
+            </a>
+          </li> -->
+
+          <!-- SIM RAPOR -->
           <li class="dropdown notifications-menu">
+            <a href="http://s.bps.go.id/simket">
+              SIMKET
+            </a>
+          </li>
+
+          <!-- SIMKET -->
+          <!-- <li class="dropdown notifications-menu">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
               <i class="fa fa-file-pdf-o"></i>
-              Panduan Penggunaan
-              <span class="label label-success">3</span>
+              File Kerja BPS1600
             </a>
             <ul class="dropdown-menu">
-              <li class="header">Panduan SIM RAPOR</li>
               <li>
-                <!-- inner menu: contains the actual data -->
                 <ul class="menu">
                   <li>
                     <a href="https://laci.bps.go.id/s/rJvvgHkm2KPvl8s">
-                      <i class="fa fa-users text-aqua"></i> Panduan Awal
+                      <i class="fa fa-file-pdf-o text-aqua"></i> Panduan SIMKET
                     </a>
                   </li>
-                  <!-- <li>
+                  <li>
                     <a href="https://laci.bps.go.id/s/R8Dmm3bIrK1jItI">
-                      <i class="fa fa-shopping-cart text-green"></i> MODUL Anggaran
+                      <i class="fa fa-file-pdf-o text-green"></i> Panduan SIMKET Modul Anggaran
+                    </a>
+                  </li>
+
+
+                  <li>
+                    <a href="https://s.bps.go.id/file_rb1600">
+                      <i class="fa fa-gears text-aqua"></i> Direktori Dokumen RB
                     </a>
                   </li>
 
                   <li>
-                    <a href="https://laci.bps.go.id/s/1xRoh37hx6kP3zY">
-                      <i class="fa fa-sticky-note text-yellow"></i> Slide SIMKET pada BIMTEK TU
+                    <a href="http://s.bps.go.id/foto1600">
+                      <i class="fa fa-file-image-o text-green"></i> Direktori Foto Kegiatan
                     </a>
-                  </li> -->
+                  </li>
+
+                  <li>
+                    <a href="http://s.bps.go.id/pedoman1600">
+                      <i class="fa fa-file-pdf-o text-aqua"></i> Direktori Buku Pedoman Kegiatan
+                    </a>
+                  </li>
+
                 </ul>
               </li>
             </ul>
+          </li> -->
+
+          <!-- SIM RAPOR -->
+          <li class="dropdown notifications-menu">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+              <i class="fa fa-file-pdf-o"></i>
+              File Kerja BPS1600
+            </a>
+            <ul class="dropdown-menu">
+              <li>
+                <ul class="menu">
+                  <li>
+                    <a href="https://laci.bps.go.id/s/yE1z8AP0GZwpDe6">
+                      <i class="fa fa-users text-aqua"></i> Panduan SIM Rapor
+                    </a>
+                  </li>
+
+                  <li>
+                    <a href="https://s.bps.go.id/file_rb1600">
+                      <i class="fa fa-gears text-aqua"></i> Direktori Dokumen RB
+                    </a>
+                  </li>
+
+                  <li>
+                    <a href="http://s.bps.go.id/foto1600">
+                      <i class="fa fa-file-image-o text-aqua"></i> Direktori Foto Kegiatan
+                    </a>
+                  </li>
+
+                  <li>
+                    <a href="http://s.bps.go.id/pedoman1600">
+                      <i class="fa fa-file-pdf-o text-aqua"></i> Direktori Buku Pedoman Kegiatan
+                    </a>
+                  </li>
+                </ul>
+              </li>
+
+            </ul>
           </li>
-
-
-
-
 
           <li class="dropdown user user-menu">
             <?php 
@@ -86,7 +146,7 @@
                 <!-- Menu Footer-->
                 <li class="user-footer">
                   <div class="pull-left">
-                  <?php echo CHtml::link("Change Password", array("user/cp"),array('class'=>'btn btn-default btn-flat') ) ?>
+                  <?php if(Yii::app()->user->id != 'guess') echo CHtml::link("Change Password", array("user/cp"),array('class'=>'btn btn-default btn-flat') ) ?>
                   </div>
                   <div class="pull-right">
                     <?php echo CHtml::link("Sign Out", array("site/logout"),array('class'=>'btn btn-default btn-flat') ) ?>
